@@ -86,6 +86,10 @@ var AnswerListPanel = function (_React$Component) {
       var answers = this.props.answers || [];
       var correctAnswer = this.props.correctAnswer;
 
+      if (answers.length == 0) {
+        this.addAnswer();
+      }
+
       // Answer panels for each answer id
       var answerNodes = answers.map(function (answer, index) {
         // Renders the actual answer
@@ -294,7 +298,7 @@ var QuestionListPanel = function (_React$Component) {
       // Create question nodes
       var questionNodes = questions.map(function (question, index) {
         // Render the question itself
-        return React.createElement(QuestionPanel, { key: question._id, index: index, question: question, parent: self, csrf: self.props.csrf });
+        return React.createElement(QuestionPanel, { key: question + index, index: index, question: question, parent: self, csrf: self.props.csrf });
       });
 
       // Render questions
@@ -515,7 +519,7 @@ var QuestionPanel = function (_React$Component) {
           React.createElement("br", null)
         ),
         function () {
-          switch (question.__t) {
+          switch (question.type) {
             case "TrueFalse":
               return React.createElement("input", { type: "button", className: "quizBuilderButton",
                 value:
@@ -582,6 +586,7 @@ var QuizInfoPanel = function (_React$Component) {
         self.setState({
           data: {
             quiz: {
+              publicId: data.quiz.publicId,
               title: _.unescape(data.quiz.title || ""), // Handles escape characters
               description: _.unescape(data.quiz.description || ""),
               questions: data.quiz.questions
@@ -620,6 +625,7 @@ var QuizInfoPanel = function (_React$Component) {
         self.setState({
           data: {
             quiz: {
+              publicId: data.quiz.publicId,
               title: _.unescape(data.quiz.title || ""), // Handles escape characters
               description: _.unescape(data.quiz.description || ""),
               questions: data.quiz.questions
@@ -685,6 +691,8 @@ var QuizInfoPanel = function (_React$Component) {
         React.createElement('br', null),
         'Only one answer can be true at a time.',
         React.createElement('hr', null),
+        'Unique URL:  ',
+        React.createElement('input', { id: 'quizName', type: 'text', value: "https://mtc-product-service-final.herokuapp.com/quizPlayer?quiz=" + quiz.publicId }),
         React.createElement(
           'div',
           null,

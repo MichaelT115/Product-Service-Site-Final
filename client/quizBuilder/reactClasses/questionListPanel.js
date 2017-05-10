@@ -51,7 +51,7 @@ class QuestionListPanel extends React.Component {
     const questionNodes = questions.map((question, index) => {
       // Render the question itself
       return (
-        < QuestionPanel key={question._id} index={index} question={question} parent={self} csrf={self.props.csrf} />
+        < QuestionPanel key={question + index} index={index} question={question} parent={self} csrf={self.props.csrf} />
       )
     });
 

@@ -167,7 +167,7 @@ class QuestionPanel extends React.Component {
         {/* List the answers to the question */}
         {
           (() => {
-            switch (question.__t) {
+            switch (question.type) {
               case "TrueFalse":
                 return (
                   <input type="button" className="quizBuilderButton"

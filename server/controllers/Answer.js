@@ -1,66 +1,61 @@
 const models = require('../models');
 
-// const Answer = models.Answer.AnswerModel;
-const Quiz = models.Quiz;
+const AnswerModel = models.Quiz.QuestionModels.MultipleChoice.AnswerModel;
+
+const returnAnswer = (request, response) => (quiz) =>
+  response.json({
+    answer:
+    quiz
+      .questions[request.body.questionIndex]
+      .answers[request.body.answerIndex],
+  });
+
+const returnAnswers = (request, response) => (quiz) =>
+  response.json({
+    answers:
+    quiz
+      .questions[request.body.questionIndex]
+      .answers,
+  });
+
+const onError = (response) => (error) => {
+  console.log(error);
+  return response.status(400).json({ error: 'An error occurred' });
+};
 
 // Create new answer
-const buildAnswer = (request, response) => {
-  const quiz = request.session.quiz;
-  const questionIndex = Number(request.body.questionIndex);
-  const newAnswer = new models.Quiz.AnswerModel();
-
-  const quizPromise = Quiz.QuizModel.answers.addAnswer(quiz._id, questionIndex, newAnswer);
-
-  quizPromise.then((doc) => response.json({ questions: doc.questions }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
+const buildAnswer = (request, response) =>
+  AnswerModel
+    .add(
+    request.session.quiz._id,
+    request.body.questionIndex,
+    new AnswerModel()
+    )
+    .then(returnAnswers(request, response))
+    .catch(onError(response));
 
 // Update answer content
-const updateAnswerContent = (request, response) => {
-  const quizPromise =
-    Quiz
-      .QuizModel
-      .answers
-      .updateContent(
-      request.session.quiz._id,
-      request.body.questionIndex,
-      request.body.answerIndex,
-      request.body.content
-      );
-
-  quizPromise.then((question) => response.json({ question }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
+const updateAnswerContent = (request, response) =>
+  AnswerModel
+    .updateContent(
+    request.session.quiz._id,
+    request.body.questionIndex,
+    request.body.answerIndex,
+    request.body.content
+    )
+    .then(returnAnswer(request, response))
+    .catch(onError(response));
 
 // Delete answer
-const deleteAnswer = (request, response) => {
-  const quizPromise =
-    Quiz
-      .QuizModel
-      .answers
-      .deleteAnswer(request.session.quiz._id, request.body.questionIndex, request.body.answerIndex);
-
-  quizPromise.then((question) => response.json({ question }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
+const deleteAnswer = (request, response) =>
+  AnswerModel
+    .delete(
+    request.session.quiz._id,
+    request.body.questionIndex,
+    request.body.answerIndex
+    )
+    .then(returnAnswers(request, response))
+    .catch(onError(response));
 
 module.exports = {
   buildAnswer,

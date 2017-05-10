@@ -1,208 +1,94 @@
 const models = require('../models');
+const QuestionModels = models.Quiz.QuestionModels;
 
-const Question = models.QuestionSchemas;
-const Quiz = models.Quiz;
+
+const returnQuestion = (request, response) => (quiz) =>
+  response.json({ question: quiz.questions[request.body.questionIndex] });
+
+const returnQuestions = (request, response) => (quiz) =>
+  response.json({ questions: quiz.questions });
+
+const onError = (response) => (error) => {
+  console.log(error);
+  return response.status(400).json({ error: 'An error occurred' });
+};
 
 // Get questions by quiz id
 const getQuestions = (request, response) =>
-  Quiz.QuizModel.questions.getQuestions(request.session.quiz._id)
-    .then(
-    (questions) => response.json({ questions }),
-    (error) => {
-      console.log(error);
-      return response.status(400).json({ error: 'An error occurred' });
-    }
-    );
-
-// Get question ids by quiz ids
-const getQuestionIds = (request, response) => {
-  const req = request;
-  const res = response;
-
-  return Question.QuestionModel.findQuestionIdsByQuizId(req.session.quiz._id)
-    .then(
-    (questionIds) => res.json({ questionIds }),
-    (error) => {
-      console.log(error);
-      return res.status(400).json({ error: 'An error occurred' });
-    }
-    );
-};
+  QuestionModels.Base.findAll(request.session.quiz._id)
+    .then((questions) => response.json({ questions }))
+    .catch(onError(response));
 
 // Get question by question id
-const getQuestion = (request, response) => {
-  const req = request;
-  const res = response;
-
-  console.dir(req.query);
-
-  return Question.QuestionModel.findByID(req.query.questionId)
-    .then(
-    (question) => {
-      console.dir(req.query);
-      console.dir(question);
-      return res.json({ question });
-    },
-    (error) => {
-      console.log(error);
-      return res.status(400).json({ error: 'An error occurred' });
-    }
-    );
-};
+const getQuestion = (request, response) =>
+  QuestionModels.Base.findByIndex(request.query.questionId)
+    .then((question) => response.json({ question }))
+    .catch(onError(response));
 
 // Build question
-const buildQuestion = (request, response) => {
-  const newQuestion = new Quiz.QuizQuestionsSchemas.MultipleChoiceSchema();
+const buildQuestion = (request, response) =>
+  QuestionModels.Base.add(request.session.quiz._id, new QuestionModels.MultipleChoice())
+    .then(returnQuestions(request, response))
+    .catch(onError(response));
 
-  const quizPromise = Quiz.QuizModel.questions.addQuestion(request.session.quiz._id, newQuestion);
-
-  quizPromise.then((quiz) => response.json({ questions: quiz.questions }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
-
-const setQuestionType = (request, response) => {
-  const quiz = request.session.quiz;
-  const index = request.body.questionIndex;
-  const type = request.body.type;
-  let newQuestion = {};
-
-  switch (type) {
-    case 'TrueFalse':
-      newQuestion = new Quiz.QuizQuestionsSchemas.TrueFalseSchema();
-      break;
-    case 'Numeric':
-      newQuestion = new Quiz.QuizQuestionsSchemas.NumericSchema();
-      break;
-    case 'Text':
-      newQuestion = new Quiz.QuizQuestionsSchemas.TextSchema();
-      break;
-    case 'MultipleChoice':
-    default:
-      newQuestion = new Quiz.QuizQuestionsSchemas.MultipleChoiceSchema();
-      break;
-  }
-
-
-  const quizPromise = Quiz.QuizModel.questions.updateQuestion(quiz._id, index, newQuestion);
-
-  quizPromise.then((question) => response.json({ question }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
+const setQuestionType = (request, response) =>
+  QuestionModels.
+    Base.
+    update(
+    request.session.quiz._id,
+    request.body.questionIndex,
+    new QuestionModels[request.body.type]()
+    )
+    .then(returnQuestion(request, response))
+    .catch(onError(response));
 
 // Update question title
-const updateQuestionTitle = (request, response) => {
-  const quizPromise =
-    Quiz
-      .QuizModel
-      .questions
-      .updateTitle(request.session.quiz._id, request.body.index, request.body.title);
-
-  quizPromise.then((question) => response.json({ question }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
+const updateQuestionTitle = (request, response) =>
+  QuestionModels.Base
+    .updateTitle(request.session.quiz._id, request.body.index, request.body.title)
+    .then(returnQuestion(request, response))
+    .catch(onError(response));
 
 // Update question content
-const updateQuestionContent = (request, response) => {
-  const quizPromise =
-    Quiz.
-      QuizModel.
-      questions.
-      updateContent(request.session.quiz._id, request.body.index, request.body.content);
-
-  quizPromise.then((question) => response.json({ question }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
+const updateQuestionContent = (request, response) =>
+  QuestionModels.Base
+    .updateContent(request.session.quiz._id, request.body.index, request.body.content)
+    .then(returnQuestion(request, response))
+    .catch(onError(response));
 
 // Update correct answer choice
-const updateCorrectAnswer = (request, response) => {
-  const quizPromise =
-    Quiz.
-      QuizModel.
-      questions.
-      updateCorrectAnswer(
-      request.session.quiz._id,
-      request.body.questionIndex,
-      request.body.answerIndex,
-      request.body.isCorrect
-      );
-
-  quizPromise.then((question) => response.json({ question }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
+const updateCorrectAnswer = (request, response) =>
+  QuestionModels
+    .MultipleChoice
+    .updateCorrectAnswer(
+    request.session.quiz._id,
+    request.body.questionIndex,
+    request.body.answerIndex,
+    request.body.isCorrect
+    )
+    .then(returnQuestion(request, response))
+    .catch(onError(response));
 
 // Update correct answer choice
-const updateAnswerIsTrue = (request, response) => {
-  const quizPromise =
-    Quiz.
-      QuizModel.
-      questions.
-      updateAnswerIsTrue(
-      request.session.quiz._id,
-      request.body.questionIndex,
-      request.body.isTrue
-      );
-
-  quizPromise.then((question) => response.json({ question }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
+const updateAnswerIsTrue = (request, response) =>
+  QuestionModels.TrueFalse
+    .updateAnswerIsTrue(
+    request.session.quiz._id,
+    request.body.questionIndex,
+    request.body.isTrue
+    )
+    .then(returnQuestion(request, response))
+    .catch(onError(response));
 
 // Delete question
-const deleteQuestion = (request, response) => {
-  const quizPromise =
-    Quiz.
-      QuizModel.
-      questions.
-      deleteQuestion(request.session.quiz._id, request.body.index);
-
-  quizPromise.then((question) => response.json({ question }));
-
-  quizPromise.catch((err) => {
-    console.log(err);
-    return response.status(400).json({ error: 'An error occurred' });
-  });
-
-  return quizPromise;
-};
+const deleteQuestion = (request, response) =>
+  QuestionModels.Base
+    .delete(request.session.quiz._id, request.body.index)
+    .then((question) => response.json({ question }))
+    .catch(onError(response));
 
 module.exports = {
   getQuestions,
-  getQuestionIds,
   getQuestion,
   buildQuestion,
   setQuestionType,

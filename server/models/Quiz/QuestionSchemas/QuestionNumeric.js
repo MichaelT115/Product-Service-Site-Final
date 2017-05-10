@@ -13,6 +13,7 @@ const NumericSchema = new mongoose.Schema(
     // Maximum accepted number for the answer.
     error: {
       type: Number,
+      default: 0,
     },
   },
   {

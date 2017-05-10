@@ -19,6 +19,7 @@ class QuizInfoPanel extends React.Component {
         self.setState({
           data: {
             quiz: {
+              publicId: data.quiz.publicId,
               title: _.unescape(data.quiz.title || ""), // Handles escape characters
               description: _.unescape(data.quiz.description || ""),
               questions: data.quiz.questions,
@@ -60,6 +61,7 @@ class QuizInfoPanel extends React.Component {
         self.setState({
           data: {
             quiz: {
+              publicId: data.quiz.publicId,
               title: _.unescape(data.quiz.title || ""), // Handles escape characters
               description: _.unescape(data.quiz.description || ""),
               questions: data.quiz.questions,
@@ -117,6 +119,7 @@ class QuizInfoPanel extends React.Component {
         Click on the '✔' next to answer to mark it false.<br />
         Only one answer can be true at a time.
         <hr />
+        Unique URL:  <input id="quizName" type="text" value={"https://mtc-product-service-final.herokuapp.com/quizPlayer?quiz=" + quiz.publicId} />
         <div>
           <input id="quizName" type="text" name="title"
             size={quiz.title.length || 25}

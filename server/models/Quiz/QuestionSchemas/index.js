@@ -8,7 +8,7 @@ const Text = require('./QuestionText.js');
 // Types of questions ENUM
 module.exports.TYPES = require('./QuestionTypes.js');
 
-module.exports.Models = {
+module.exports.Schemas = {
   Base,
   MultipleChoice,
   TrueFalse,

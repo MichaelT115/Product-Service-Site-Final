@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 const _ = require('underscore');
 
-
 const setTitle = (name) => _.escape(name).trim();
 
 // Define question schema
@@ -22,6 +21,14 @@ const QuestionSchema = new mongoose.Schema(
       set: setTitle,
     },
 
+    reward: {
+      type: Number,
+    },
+
+    penalty: {
+      type: Number,
+    },
+
     // Date the question was created
     createdDate: {
       type: Date,
@@ -30,6 +37,7 @@ const QuestionSchema = new mongoose.Schema(
   },
   {
     discriminatorKey: 'type',
+    _id: false,
   });
 
 module.exports.QuestionSchema = QuestionSchema;

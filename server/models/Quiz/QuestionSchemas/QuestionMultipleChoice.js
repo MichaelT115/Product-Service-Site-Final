@@ -8,6 +8,8 @@ const MultipleChoiceSchema = new mongoose.Schema(
     // Index of the correct answer to this question
     correctAnswerIndex: {
       type: Number,
+      default: 0,
+      required: true,
     },
 
     // Possible answers for the question

@@ -43,6 +43,10 @@ class AnswerListPanel extends React.Component {
     const answers = this.props.answers || [];
     const correctAnswer = this.props.correctAnswer;
 
+    if (answers.length == 0) {
+      this.addAnswer();
+    }
+
     // Answer panels for each answer id
     const answerNodes = answers.map((answer, index) => {
       // Renders the actual answer

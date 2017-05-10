@@ -7,9 +7,10 @@ const setAnswerText = (text) => _.escape(text).trim();
 const TextSchema = new mongoose.Schema(
   {
     // The text answer to the question
-    answerText: {
+    answer: {
       type: String,
       set: setAnswerText,
+      default: undefined,
     },
   },
   {
