@@ -23,6 +23,12 @@ QuizSchema.statics.toAPI = (doc) => ({
   questions: doc.questions,
 });
 
+QuizSchema.statics.getInfo = (doc) => ({
+  publicId: doc.publicId,
+  title: doc.title,
+  description: doc.description,
+});
+
 // Get all quizzes
 QuizSchema.statics.findAll = () =>
   QuizModel
@@ -43,13 +49,6 @@ QuizSchema.statics.findByQuizId = (quizId) =>
     .exec();
 
 // Find quiz by creator's account id
-QuizSchema.statics.findByCreator = (creatorId) =>
-  QuizModel
-    .find({
-      creator: convertId(creatorId),
-    })
-    .exec();
-
 QuizSchema.statics.findByCreator = (creatorId) =>
   QuizModel
     .find({
@@ -118,7 +117,7 @@ QuestionSchemas.Base.QuestionSchema.statics = {
         const currentQuestion = doc.questions[questionIndex];
 
         question.title = currentQuestion.title;
-        question.description = currentQuestion.description;
+        question.content = currentQuestion.content;
 
         doc.questions.splice(questionIndex, 1, question);
         return doc.save();
@@ -251,6 +250,10 @@ QuestionSchemas.MultipleChoice.Answer.AnswerSchema.statics = {
           question.correctAnswerIndex -= 1;
         }
 
+        if (question.correctAnswerIndex < 0) {
+          question.correctAnswerIndex = 0;
+        }
+
         return doc.save();
       }),
 };
@@ -289,13 +292,14 @@ QuestionSchemas.Numeric.NumericSchema.statics = {
 };
 
 QuestionSchemas.Text.TextSchema.statics = {
-  updateAnswer: (quizId, questionIndex, answerText) =>
+  updateAnswer: (quizId, questionIndex, answer) =>
     QuizModel
       .findById(quizId)
       .exec()
       .then((_doc) => {
         const doc = _doc;
-        doc.questions[questionIndex].answerText = answerText;
+        console.dir(questionIndex);
+        doc.questions[questionIndex].answer = answer;
         return doc.save();
       }),
 };

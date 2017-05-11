@@ -36,6 +36,12 @@ const router = (app) => {
   app.post('/buildQuiz', mid.requiresSecure, controllers.QuizBuilder.buildQuiz);
   // Get the currently selected quiz
   app.get('/getQuiz', mid.requiresSecure, mid.requiresQuizSelected, controllers.Quiz.getQuiz);
+  app.get(
+    '/getQuizInfo',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Quiz.getQuizInfo
+  );
   // Update quiz title
   app.put(
     '/updateQuizTitle',
@@ -108,6 +114,26 @@ const router = (app) => {
     mid.requiresQuizSelected,
     controllers.Question.updateAnswerIsTrue
   );
+
+  app.put(
+    '/updateAnswerNumeric',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Question.updateAnswerNumeric
+  );
+  app.put(
+    '/updateAnswerError',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Question.updateAnswerError
+  );
+  app.put(
+    '/updateAnswerText',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Question.updateAnswerText
+  );
+
   // Delete question and associated answers.
   app.delete(
     '/deleteQuestion',

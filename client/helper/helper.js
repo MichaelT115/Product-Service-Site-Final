@@ -22,9 +22,13 @@ const sendAjax = (type, action, data, success) => $.ajax({
   },
 });
 
-// Update the size of a text area
-const updateTextAreaSize = (_textArea) => {
-  const textArea = _textArea;
-  textArea.style.height = '0px';
-  textArea.style.height = `${textArea.scrollHeight + 5}px`;
+const createQuizURL = (publicId) =>
+  `https://mtc-product-service-final.herokuapp.com/quizPlayer?quiz=${publicId}`;
+
+const setMessageSaving = () => {
+  $('#quizSaveMessage').text('Saving...');
+};
+
+const setMessageSaved = () => {
+  $('#quizSaveMessage').text('Database Up-To-Date');
 };

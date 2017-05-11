@@ -7,38 +7,46 @@ class QuestionListPanel extends React.Component {
     this.state.data = {};
 
     this.loadQuestions = this.loadQuestions.bind(this);
+    this.addQuestion = this.addQuestion.bind(this);
+    this.deleteQuestion = this.deleteQuestion.bind(this);
+  }
+
+  componentWillMount() {
+    this.loadQuestions();
   }
 
   // Loads the questions.
   loadQuestions() {
-    this.props.loadQuestions();
+    sendAjax('GET', '/getQuestions', { _csrf: this.props.csrf, })
+      .then((data) => {
+        this.setState({
+          data: {
+            questions: data.questions,
+          },
+        });
+      }).then(setMessageSaved);
   }
 
   // Add question to quiz
   addQuestion() {
-    const self = this;
     sendAjax('POST', '/buildQuestion', { _csrf: this.props.csrf, })
-      .then((data) => {
-        self.loadQuestions();
-      });
+      .then(this.loadQuestions);
   }
 
   // Delete question from quiz
   deleteQuestion(questionIndex) {
     const self = this;
     sendAjax('DELETE', '/deleteQuestion', { _csrf: this.props.csrf, index: questionIndex })
-      .then((data) => {
-        self.loadQuestions();
-      });
+      .then(this.loadQuestions);
   }
 
   // Render the questions
   render() {
     const self = this;
-    const questions = this.props.questions;
+    const questions = this.state.data.questions || [];
 
     // Check if question ids are loaded
-    if (!questions) {
+    if (questions.length === 0) {
       return (
         <div>
           <h3>No Questions Yet</h3>
@@ -51,7 +59,7 @@ class QuestionListPanel extends React.Component {
     const questionNodes = questions.map((question, index) => {
       // Render the question itself
       return (
-        < QuestionPanel key={question + index} index={index} question={question} parent={self} csrf={self.props.csrf} />
+        < QuestionPanel key={question.id} index={index} question={question} parent={self} csrf={self.props.csrf} />
       )
     });
 

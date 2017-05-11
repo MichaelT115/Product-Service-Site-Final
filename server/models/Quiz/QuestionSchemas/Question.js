@@ -1,12 +1,18 @@
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 const _ = require('underscore');
+const shortid = require('shortid');
 
 const setTitle = (name) => _.escape(name).trim();
 
 // Define question schema
 const QuestionSchema = new mongoose.Schema(
   {
+    id: {
+      type: String,
+      default: shortid.generate,
+    },
+
     // Title of question
     title: {
       type: String,
@@ -18,7 +24,6 @@ const QuestionSchema = new mongoose.Schema(
     content: {
       type: String,
       trim: true,
-      set: setTitle,
     },
 
     reward: {
@@ -36,8 +41,8 @@ const QuestionSchema = new mongoose.Schema(
     },
   },
   {
-    discriminatorKey: 'type',
     _id: false,
+    discriminatorKey: 'type',
   });
 
 module.exports.QuestionSchema = QuestionSchema;

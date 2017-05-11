@@ -24,52 +24,29 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 // Panel that holds the list of answers
-var AnswerListPanel = function (_React$Component) {
-  _inherits(AnswerListPanel, _React$Component);
+var AnswerMultipleChoiceListPanel = function (_React$Component) {
+  _inherits(AnswerMultipleChoiceListPanel, _React$Component);
 
   // Create initial data
-  function AnswerListPanel() {
-    _classCallCheck(this, AnswerListPanel);
+  function AnswerMultipleChoiceListPanel() {
+    _classCallCheck(this, AnswerMultipleChoiceListPanel);
 
-    var _this = _possibleConstructorReturn(this, (AnswerListPanel.__proto__ || Object.getPrototypeOf(AnswerListPanel)).call(this));
+    var _this = _possibleConstructorReturn(this, (AnswerMultipleChoiceListPanel.__proto__ || Object.getPrototypeOf(AnswerMultipleChoiceListPanel)).call(this));
 
-    _this.state = {};
-    _this.state.data = {};
-
-    _this.loadAnswers = _this.loadAnswers.bind(_this);
+    _this.addAnswer = _this.addAnswer.bind(_this);
     return _this;
   }
 
-  // Load answer from the server and set the state
+  // Add an answer to the question
 
 
-  _createClass(AnswerListPanel, [{
-    key: 'loadAnswers',
-    value: function loadAnswers() {
-      var self = this;
-      this.props.parent.loadAnswers();
-    }
-
-    // Add an answer to the question
-
-  }, {
+  _createClass(AnswerMultipleChoiceListPanel, [{
     key: 'addAnswer',
     value: function addAnswer() {
-      var self = this;
-      sendAjax('POST', '/buildAnswer', { _csrf: self.props.csrf, questionIndex: self.props.parent.props.index }).then(self.loadAnswers.bind(self));
-    }
-
-    // Delete answer from question
-
-  }, {
-    key: 'deleteAnswer',
-    value: function deleteAnswer(answerIndex) {
-      var self = this;
-      sendAjax('DELETE', '/deleteAnswer', {
-        _csrf: self.props.csrf,
-        questionIndex: self.props.parent.props.index,
-        answerIndex: answerIndex
-      }).then(self.loadAnswers.bind(self));
+      sendAjax('POST', '/buildAnswer', {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.index
+      }).then(this.props.onChange);
     }
 
     // Update if answer is correct
@@ -77,14 +54,20 @@ var AnswerListPanel = function (_React$Component) {
   }, {
     key: 'updateCorrectAnswer',
     value: function updateCorrectAnswer(answerIndex, isCorrect) {
-      this.props.parent.updateCorrectAnswer(answerIndex, isCorrect);
+      sendAjax("PUT", '/updateQuestionCorrectAnswer', {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.index,
+        answerIndex: answerIndex,
+        isCorrect: isCorrect
+      }).then(this.props.onChange);
     }
   }, {
     key: 'render',
     value: function render() {
-      var self = this;
-      var answers = this.props.answers || [];
-      var correctAnswer = this.props.correctAnswer;
+      var _this2 = this;
+
+      var question = this.props.question;
+      var answers = question.answers || [];
 
       if (answers.length == 0) {
         this.addAnswer();
@@ -93,13 +76,15 @@ var AnswerListPanel = function (_React$Component) {
       // Answer panels for each answer id
       var answerNodes = answers.map(function (answer, index) {
         // Renders the actual answer
-        return React.createElement(AnswerPanel, {
-          key: answer._id,
+        return React.createElement(AnswerMultipleChoicePanel, {
+          key: answer.id,
+          questionIndex: _this2.props.index,
           index: index,
-          parent: self,
+          question: _this2.props.question,
           answer: answer,
-          isCorrect: index === correctAnswer,
-          csrf: self.props.csrf
+          parent: _this2,
+          onChange: _this2.props.onChange,
+          csrf: _this2.props.csrf
         });
       });
 
@@ -108,12 +93,276 @@ var AnswerListPanel = function (_React$Component) {
         'div',
         null,
         answerNodes,
-        React.createElement('input', { className: 'quizBuilderButton', type: 'button', onClick: self.addAnswer.bind(self), value: 'Add Answer' })
+        React.createElement('input', {
+          className: 'quizBuilderButton',
+          type: 'button',
+          onClick: this.addAnswer,
+          value: 'Add Answer'
+        })
       );
     }
   }]);
 
-  return AnswerListPanel;
+  return AnswerMultipleChoiceListPanel;
+}(React.Component);
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// Panel that holds an answer to the question
+var AnswerMultipleChoicePanel = function (_React$Component) {
+  _inherits(AnswerMultipleChoicePanel, _React$Component);
+
+  // Create initial data
+  function AnswerMultipleChoicePanel() {
+    _classCallCheck(this, AnswerMultipleChoicePanel);
+
+    var _this = _possibleConstructorReturn(this, (AnswerMultipleChoicePanel.__proto__ || Object.getPrototypeOf(AnswerMultipleChoicePanel)).call(this));
+
+    _this.state = {};
+    _this.state.data = {};
+
+    _this.updateAnswer = _this.updateAnswer.bind(_this);
+    _this.deleteAnswer = _this.deleteAnswer.bind(_this);
+    return _this;
+  }
+
+  // Update this answer
+
+
+  _createClass(AnswerMultipleChoicePanel, [{
+    key: 'updateAnswer',
+    value: function updateAnswer(content) {
+      sendAjax("PUT", '/updateAnswer', {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.questionIndex,
+        answerIndex: this.props.index,
+        content: content
+      }).then(setMessageSaved);
+    }
+
+    // Delete answer from question
+
+  }, {
+    key: 'deleteAnswer',
+    value: function deleteAnswer() {
+      sendAjax('DELETE', '/deleteAnswer', {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.questionIndex,
+        answerIndex: this.props.index
+      }).then(this.props.onChange);
+    }
+
+    // Render answer
+
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      var answer = this.props.answer;
+      var answerContentId = 'answerContent_a' + this.props.index + '_q' + this.props.questionIndex;
+
+      // Updates the answer after the user has stopped typing for half a second.
+      var answerUpdater = new DelayUpdateHandler(500, function () {
+        _this2.updateAnswer($('#' + answerContentId).val());
+      }, setMessageSaving);
+
+      // Final render
+      return React.createElement(
+        'div',
+        { className: 'answerPanel' },
+        React.createElement('input', { type: 'button', className: 'quizBuilderButton',
+          value:
+          // Set the change correctness button icon
+          this.props.question.correctAnswerIndex == this.props.index ? "✔" : "✘",
+          onClick:
+          // Change the answer correctness
+          function onClick() {
+            return _this2.props.parent.updateCorrectAnswer(_this2.props.index, !_this2.props.isCorrect);
+          }
+        }),
+        React.createElement('input', { id: answerContentId, className: 'questionTitle', type: 'text', name: 'content',
+          defaultValue: _.unescape(answer.content || ""),
+          placeholder: 'Enter Answer',
+          size: answer.content ? answer.content.length || 10 : 10,
+          onChange: function onChange(e) {
+            // Set size of info field
+            e.target.size = e.target.value.length || 10;
+            // Update answer
+            answerUpdater.update();
+          }
+        }),
+        React.createElement('input', { type: 'button', className: 'quizBuilderButton', value: 'Delete Answer',
+          onClick: this.deleteAnswer
+        })
+      );
+    }
+  }]);
+
+  return AnswerMultipleChoicePanel;
+}(React.Component);
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var AnswerNumericPanel = function (_React$Component) {
+  _inherits(AnswerNumericPanel, _React$Component);
+
+  function AnswerNumericPanel() {
+    _classCallCheck(this, AnswerNumericPanel);
+
+    var _this = _possibleConstructorReturn(this, (AnswerNumericPanel.__proto__ || Object.getPrototypeOf(AnswerNumericPanel)).call(this));
+
+    _this.updateAnswerNumeric = _this.updateAnswerNumeric.bind(_this);
+    _this.updateAnswerError = _this.updateAnswerError.bind(_this);
+    return _this;
+  }
+
+  // Update this answer
+
+
+  _createClass(AnswerNumericPanel, [{
+    key: "updateAnswerNumeric",
+    value: function updateAnswerNumeric(answer) {
+      sendAjax("PUT", '/updateAnswerNumeric', {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.index,
+        answer: answer
+      }).then(this.props.onChange);
+    }
+
+    // Update this answer
+
+  }, {
+    key: "updateAnswerError",
+    value: function updateAnswerError(error) {
+      sendAjax("PUT", '/updateAnswerError', {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.index,
+        error: error
+      }).then(this.props.onChange);
+    }
+
+    // Render answer
+
+  }, {
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+
+      var question = this.props.question;
+      return React.createElement(
+        "div",
+        null,
+        "Answer:",
+        React.createElement("input", {
+          type: "number",
+          step: 0.0001,
+          defaultValue: question.answer,
+          name: "quantity",
+          onChange: function onChange(e) {
+            setMessageSaving();
+            _this2.updateAnswerNumeric(e.target.value);
+          }
+        }),
+        React.createElement("br", null),
+        "Allowed Error:",
+        React.createElement("input", {
+          type: "number",
+          min: 0,
+          step: 0.0001,
+          defaultValue: question.error,
+          name: "quantity",
+          onChange: function onChange(e) {
+            setMessageSaving();
+            _this2.updateAnswerError(e.target.value);
+          }
+        })
+      );
+    }
+  }]);
+
+  return AnswerNumericPanel;
+}(React.Component);
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var AnswerTextPanel = function (_React$Component) {
+  _inherits(AnswerTextPanel, _React$Component);
+
+  function AnswerTextPanel() {
+    _classCallCheck(this, AnswerTextPanel);
+
+    var _this = _possibleConstructorReturn(this, (AnswerTextPanel.__proto__ || Object.getPrototypeOf(AnswerTextPanel)).call(this));
+
+    _this.updateAnswer = _this.updateAnswer.bind(_this);
+    return _this;
+  }
+
+  // Update this answer
+
+
+  _createClass(AnswerTextPanel, [{
+    key: "updateAnswer",
+    value: function updateAnswer(answer) {
+      sendAjax("PUT", '/updateAnswerText', {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.index,
+        answer: answer
+      }).then(this.props.onChange);
+    }
+
+    // Render answer
+
+  }, {
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+
+      var question = this.props.question;
+      var answerContentId = "answerContent_text_q" + this.props.questionIndex;
+
+      // Updates the answer after the user has stopped typing for half a second.
+      var answerUpdater = new DelayUpdateHandler(500, function () {
+        _this2.updateAnswer($("#" + answerContentId).val());
+      }, setMessageSaving);
+
+      // Final render
+      return React.createElement(
+        "div",
+        { className: "answerPanel" },
+        React.createElement(AutoExpandTextField, {
+          id: answerContentId,
+          className: "questionTitle",
+          placeholder: "Type Answer Here",
+          defaultValue: question.answer,
+          onChange: answerUpdater.update
+        })
+      );
+    }
+  }]);
+
+  return AnswerTextPanel;
 }(React.Component);
 "use strict";
 
@@ -126,33 +375,30 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 // Panel that holds an answer to the question
-var AnswerPanel = function (_React$Component) {
-  _inherits(AnswerPanel, _React$Component);
+var AnswerTrueFalsePanel = function (_React$Component) {
+  _inherits(AnswerTrueFalsePanel, _React$Component);
 
   // Create initial data
-  function AnswerPanel() {
-    _classCallCheck(this, AnswerPanel);
+  function AnswerTrueFalsePanel() {
+    _classCallCheck(this, AnswerTrueFalsePanel);
 
-    var _this = _possibleConstructorReturn(this, (AnswerPanel.__proto__ || Object.getPrototypeOf(AnswerPanel)).call(this));
+    var _this = _possibleConstructorReturn(this, (AnswerTrueFalsePanel.__proto__ || Object.getPrototypeOf(AnswerTrueFalsePanel)).call(this));
 
-    _this.state = {};
-    _this.state.data = {};
+    _this.updateAnswerIsTrue = _this.updateAnswerIsTrue.bind(_this);
     return _this;
   }
 
   // Update this answer
 
 
-  _createClass(AnswerPanel, [{
-    key: "updateAnswer",
-    value: function updateAnswer(content) {
-      var self = this;
-      sendAjax("PUT", '/updateAnswer', {
-        _csrf: self.props.csrf,
-        questionIndex: self.props.parent.props.parent.props.index,
-        answerIndex: self.props.index,
-        content: content
-      });
+  _createClass(AnswerTrueFalsePanel, [{
+    key: "updateAnswerIsTrue",
+    value: function updateAnswerIsTrue(isTrue) {
+      sendAjax("PUT", '/updateAnswerIsTrue', {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.index,
+        isTrue: isTrue
+      }).then(this.props.onChange);
     }
 
     // Render answer
@@ -162,58 +408,20 @@ var AnswerPanel = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      var answer = this.props.answer;
-      var answerContentId = "answerContent_a" + this.props.index + "_q" + this.props.parent.props.parent.props.index;
-
-      // Check if the answer is loaded
-      if (!answer) {
-        return React.createElement(
-          "div",
-          null,
-          " Answer Not Loaded"
-        );
-      }
-
-      // Updates the answer after the user has stopped typing for half a second.
-      var answerUpdater = new DelayUpdateHandler(500, function () {
-        _this2.updateAnswer($("#" + answerContentId).val());
+      var question = this.props.question;
+      return React.createElement("input", { type: "button", className: "quizBuilderButton",
+        value:
+        // Set the change correctness button icon
+        question.isTrue ? "✔ TRUE" : "✘ FALSE",
+        onClick: function onClick() {
+          setMessageSaving();
+          _this2.updateAnswerIsTrue(!question.isTrue);
+        }
       });
-
-      // Final render
-      return React.createElement(
-        "div",
-        { className: "answerPanel" },
-        React.createElement("input", { type: "button", className: "quizBuilderButton",
-          value:
-          // Set the change correctness button icon
-          this.props.isCorrect ? "✔" : "✘",
-          onClick:
-          // Change the answer correctness
-          function onClick() {
-            return _this2.props.parent.updateCorrectAnswer(_this2.props.index, !_this2.props.isCorrect);
-          }
-        }),
-        React.createElement("input", { id: answerContentId, className: "questionTitle", type: "text", name: "content",
-          defaultValue: _.unescape(answer.content || ""),
-          placeholder: "Enter Answer",
-          size: answer.content ? answer.content.length || 10 : 10,
-          onChange: function onChange(e) {
-            // Set size of info field
-            e.target.size = e.target.value.length || 10;
-            // Update answer
-            answerUpdater.update();
-          }
-        }),
-        React.createElement("input", { type: "button", className: "quizBuilderButton", value: "Delete Answer",
-          onClick: function onClick() {
-            return _this2.props.parent.deleteAnswer(_this2.props.index);
-          }
-        })
-      );
     }
   }]);
 
-  return AnswerPanel;
+  return AnswerTrueFalsePanel;
 }(React.Component);
 'use strict';
 
@@ -239,16 +447,31 @@ var QuestionListPanel = function (_React$Component) {
     _this.state.data = {};
 
     _this.loadQuestions = _this.loadQuestions.bind(_this);
+    _this.addQuestion = _this.addQuestion.bind(_this);
+    _this.deleteQuestion = _this.deleteQuestion.bind(_this);
     return _this;
   }
 
-  // Loads the questions.
-
-
   _createClass(QuestionListPanel, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      this.loadQuestions();
+    }
+
+    // Loads the questions.
+
+  }, {
     key: 'loadQuestions',
     value: function loadQuestions() {
-      this.props.loadQuestions();
+      var _this2 = this;
+
+      sendAjax('GET', '/getQuestions', { _csrf: this.props.csrf }).then(function (data) {
+        _this2.setState({
+          data: {
+            questions: data.questions
+          }
+        });
+      }).then(setMessageSaved);
     }
 
     // Add question to quiz
@@ -256,10 +479,7 @@ var QuestionListPanel = function (_React$Component) {
   }, {
     key: 'addQuestion',
     value: function addQuestion() {
-      var self = this;
-      sendAjax('POST', '/buildQuestion', { _csrf: this.props.csrf }).then(function (data) {
-        self.loadQuestions();
-      });
+      sendAjax('POST', '/buildQuestion', { _csrf: this.props.csrf }).then(this.loadQuestions);
     }
 
     // Delete question from quiz
@@ -268,9 +488,7 @@ var QuestionListPanel = function (_React$Component) {
     key: 'deleteQuestion',
     value: function deleteQuestion(questionIndex) {
       var self = this;
-      sendAjax('DELETE', '/deleteQuestion', { _csrf: this.props.csrf, index: questionIndex }).then(function (data) {
-        self.loadQuestions();
-      });
+      sendAjax('DELETE', '/deleteQuestion', { _csrf: this.props.csrf, index: questionIndex }).then(this.loadQuestions);
     }
 
     // Render the questions
@@ -279,10 +497,10 @@ var QuestionListPanel = function (_React$Component) {
     key: 'render',
     value: function render() {
       var self = this;
-      var questions = this.props.questions;
+      var questions = this.state.data.questions || [];
 
       // Check if question ids are loaded
-      if (!questions) {
+      if (questions.length === 0) {
         return React.createElement(
           'div',
           null,
@@ -298,7 +516,7 @@ var QuestionListPanel = function (_React$Component) {
       // Create question nodes
       var questionNodes = questions.map(function (question, index) {
         // Render the question itself
-        return React.createElement(QuestionPanel, { key: question + index, index: index, question: question, parent: self, csrf: self.props.csrf });
+        return React.createElement(QuestionPanel, { key: question.id, index: index, question: question, parent: self, csrf: self.props.csrf });
       });
 
       // Render questions
@@ -336,14 +554,26 @@ var QuestionPanel = function (_React$Component) {
     _this.state = {};
     _this.state.data = {};
 
-    _this.loadAnswers = _this.loadAnswers.bind(_this);
+    _this.loadQuestions = _this.loadQuestions.bind(_this);
+    _this.setQuestionType = _this.setQuestionType.bind(_this);
+    _this.updateTitle = _this.updateTitle.bind(_this);
+    _this.updateDescription = _this.updateDescription.bind(_this);
     return _this;
   }
 
   _createClass(QuestionPanel, [{
-    key: "loadAnswers",
-    value: function loadAnswers() {
+    key: "loadQuestions",
+    value: function loadQuestions() {
       this.props.parent.loadQuestions();
+    }
+  }, {
+    key: "setQuestionType",
+    value: function setQuestionType(e) {
+      sendAjax("PUT", '/setQuestionType', {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.index,
+        type: e.target.value
+      }).then(this.loadQuestions);
     }
 
     // Update title of question
@@ -351,12 +581,11 @@ var QuestionPanel = function (_React$Component) {
   }, {
     key: "updateTitle",
     value: function updateTitle(title) {
-      var self = this;
       sendAjax("PUT", '/updateQuestionTitle', {
-        _csrf: self.props.csrf,
-        index: self.props.index,
+        _csrf: this.props.csrf,
+        index: this.props.index,
         title: title
-      });
+      }).then(setMessageSaved);
     }
 
     // Update description of question
@@ -364,26 +593,11 @@ var QuestionPanel = function (_React$Component) {
   }, {
     key: "updateDescription",
     value: function updateDescription(content) {
-      var self = this;
       sendAjax("PUT", '/updateQuestionContent', {
-        _csrf: self.props.csrf,
-        index: self.props.index,
+        _csrf: this.props.csrf,
+        index: this.props.index,
         content: content
-      });
-    }
-
-    // Update the correct answer of the question
-
-  }, {
-    key: "updateCorrectAnswer",
-    value: function updateCorrectAnswer(answerIndex, isCorrect) {
-      var self = this;
-      sendAjax("PUT", '/updateQuestionCorrectAnswer', {
-        _csrf: self.props.csrf,
-        questionIndex: self.props.index,
-        answerIndex: answerIndex,
-        isCorrect: isCorrect
-      }).then(self.loadAnswers);
+      }).then(setMessageSaved);
     }
 
     // Render question
@@ -406,27 +620,54 @@ var QuestionPanel = function (_React$Component) {
         );
       }
 
-      // The resize requires that the DOM element itself is rendered
-      // This means that we have to wait for the first frame to be rendered.
-      setTimeout(function () {
-        window.requestAnimationFrame(function () {
-          var questionFields = $(".questionDescription").toArray();
-          questionFields.forEach(function (descriptionField) {
-            updateTextAreaSize(descriptionField);
-          }, _this2);
-        });
-      }, 0);
-
       // Updates the question's title after the user has stopped typing for half a second.
       var titleUpdater = new DelayUpdateHandler(500, function () {
         _this2.updateTitle($("#" + questionTitleId).val());
-      });
+      }, setMessageSaving);
       // Updates the question's description after the user has stopped typing for half a second.
       var contentUpdater = new DelayUpdateHandler(500, function () {
         _this2.updateDescription($("#" + questionDescriptionId).val());
-      });
+      }, setMessageSaving);
 
-      var self = this;
+      var answerPanel = void 0;
+      switch (question.type) {
+        case "MultipleChoice":
+          answerPanel = React.createElement(AnswerMultipleChoiceListPanel, {
+            index: this.props.index,
+            question: question,
+            onChange: this.loadQuestions,
+            csrf: this.props.csrf });
+          break;
+
+        case "TrueFalse":
+          answerPanel = React.createElement(AnswerTrueFalsePanel, {
+            index: this.props.index,
+            question: question,
+            onChange: this.loadQuestions,
+            csrf: this.props.csrf
+          });
+          break;
+
+        case "Numeric":
+          answerPanel = React.createElement(AnswerNumericPanel, {
+            index: this.props.index,
+            question: question,
+            onChange: this.loadQuestions,
+            csrf: this.props.csrf
+          });
+          break;
+
+        default:
+        case "Text":
+          answerPanel = React.createElement(AnswerTextPanel, {
+            index: this.props.index,
+            question: question,
+            onChange: this.loadQuestions,
+            csrf: this.props.csrf
+          });
+          break;
+      }
+
       return React.createElement(
         "div",
         { className: "questionPanel" },
@@ -444,14 +685,9 @@ var QuestionPanel = function (_React$Component) {
         }),
         React.createElement(
           "select",
-          { defaultValue: question.__t,
-            onChange: function onChange(e) {
-              sendAjax("PUT", '/setQuestiontype', {
-                _csrf: self.props.csrf,
-                questionIndex: self.props.index,
-                type: e.target.value
-              }).then(self.loadAnswers);
-            }
+          {
+            defaultValue: question.type,
+            onChange: this.setQuestionType
           },
           React.createElement(
             "option",
@@ -483,19 +719,14 @@ var QuestionPanel = function (_React$Component) {
             null,
             " Title: "
           ),
-          React.createElement("input", { id: questionTitleId, className: "questionTitle", type: "text", name: "name",
-            defaultValue: decodeURI(question.title || ""),
+          React.createElement(AutoExpandTextField, {
+            id: questionTitleId,
+            className: "questionTitle",
+            name: "name",
             placeholder: "Enter Title for Question",
-            size: question.title ? question.title.length || 20 : 20,
-            onChange: function onChange(e) {
-              // Update field size
-              e.target.size = e.target.value.length || 20;
-
-              // Update title
-              titleUpdater.update();
-            }
-          }),
-          React.createElement("br", null)
+            defaultValue: this.props.question.title,
+            onChange: titleUpdater.update
+          })
         ),
         React.createElement(
           "div",
@@ -506,40 +737,17 @@ var QuestionPanel = function (_React$Component) {
             "Question:"
           ),
           React.createElement("br", null),
-          React.createElement("textarea", { id: questionDescriptionId, className: "questionDescription", type: "text", name: "content",
+          React.createElement(AutoExpandTextArea, {
+            id: questionDescriptionId,
+            className: "questionDescription",
+            name: "content",
             placeholder: "Enter description",
             defaultValue: question.content,
-            onChange: function onChange(e) {
-              // Update description
-              contentUpdater.update();
-
-              // Update text area size
-              updateTextAreaSize(e.target);
-            } }),
+            onChange: contentUpdater.update
+          }),
           React.createElement("br", null)
         ),
-        function () {
-          switch (question.type) {
-            case "TrueFalse":
-              return React.createElement("input", { type: "button", className: "quizBuilderButton",
-                value:
-                // Set the change correctness button icon
-                question.isTrue ? "✔" : "✘",
-                onClick:
-                // Change the answer correctness
-                function onClick(e) {
-                  sendAjax("PUT", '/updateAnswerIsTrue', {
-                    _csrf: self.props.csrf,
-                    questionIndex: self.props.index,
-                    isTrue: !question.isTrue
-                  }).then(self.loadAnswers);
-                }
-              });
-            case "MultipleChoice":
-            default:
-              return React.createElement(AnswerListPanel, { answers: question.answers, parent: self, correctAnswer: question.correctAnswerIndex, csrf: _this2.props.csrf });
-          }
-        }()
+        answerPanel
       );
     }
   }]);
@@ -570,7 +778,9 @@ var QuizInfoPanel = function (_React$Component) {
     _this.state = {};
     _this.state.data = {};
 
-    _this.loadQuestions = _this.loadQuestions.bind(_this);
+    _this.loadQuizInfo = _this.loadQuizInfo.bind(_this);
+    _this.updateTitle = _this.updateTitle.bind(_this);
+    _this.updateDescription = _this.updateDescription.bind(_this);
     return _this;
   }
 
@@ -580,16 +790,21 @@ var QuizInfoPanel = function (_React$Component) {
   _createClass(QuizInfoPanel, [{
     key: 'componentWillMount',
     value: function componentWillMount() {
-      var self = this;
-      sendAjax('GET', '/getQuiz').then(function (data) {
+      this.loadQuizInfo();
+    }
+  }, {
+    key: 'loadQuizInfo',
+    value: function loadQuizInfo() {
+      var _this2 = this;
+
+      sendAjax('GET', '/getQuizInfo').then(function (quizInfo) {
         // Set state of quiz
-        self.setState({
+        _this2.setState({
           data: {
-            quiz: {
-              publicId: data.quiz.publicId,
-              title: _.unescape(data.quiz.title || ""), // Handles escape characters
-              description: _.unescape(data.quiz.description || ""),
-              questions: data.quiz.questions
+            quizInfo: {
+              publicId: quizInfo.publicId,
+              title: _.unescape(quizInfo.title || ""), // Handles escape characters
+              description: _.unescape(quizInfo.description || "")
             }
           }
         });
@@ -604,7 +819,7 @@ var QuizInfoPanel = function (_React$Component) {
       sendAjax('PUT', '/updateQuizTitle', {
         _csrf: this.props.csrf,
         title: title || "Untitled Quiz"
-      });
+      }).then(setMessageSaved);
     }
 
     // Update the description of the quiz in the database  
@@ -614,25 +829,7 @@ var QuizInfoPanel = function (_React$Component) {
     value: function updateDescription(description) {
       sendAjax('PUT', '/updateQuizDescription', {
         _csrf: this.props.csrf,
-        description: description });
-    }
-  }, {
-    key: 'loadQuestions',
-    value: function loadQuestions() {
-      var self = this;
-      sendAjax('GET', '/getQuiz').then(function (data) {
-        // Set state of quiz
-        self.setState({
-          data: {
-            quiz: {
-              publicId: data.quiz.publicId,
-              title: _.unescape(data.quiz.title || ""), // Handles escape characters
-              description: _.unescape(data.quiz.description || ""),
-              questions: data.quiz.questions
-            }
-          }
-        });
-      });
+        description: description }).then(setMessageSaved);
     }
 
     // Render the quiz data
@@ -641,11 +838,11 @@ var QuizInfoPanel = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      var _this2 = this;
+      var _this3 = this;
 
-      var quiz = this.state.data.quiz;
+      var quizInfo = this.state.data.quizInfo;
       // If the quiz is not ready to show
-      if (!quiz) {
+      if (!quizInfo) {
         return React.createElement(
           'div',
           { id: 'quizInfoPanel' },
@@ -659,20 +856,12 @@ var QuizInfoPanel = function (_React$Component) {
 
       // Updates the quiz after the user has stopped typing for half a second.
       var titleUpdater = new DelayUpdateHandler(500, function () {
-        _this2.updateTitle($('#quizName').val());
-      });
+        _this3.updateTitle($('#quizName').val());
+      }, setMessageSaving);
       // Updates the description after the user has stopped typing for half a second.
       var descriptionUpdater = new DelayUpdateHandler(500, function () {
-        _this2.updateDescription($('#quizDescription').val());
-      });
-
-      // The resize requires that the DOM element itself is rendered
-      // This means that we have to wait for the first frame to be rendered.
-      setTimeout(function () {
-        window.requestAnimationFrame(function () {
-          updateTextAreaSize($("#quizDescription")[0]);
-        });
-      }, 0);
+        _this3.updateDescription($('#quizDescription').val());
+      }, setMessageSaving);
 
       return React.createElement(
         'div',
@@ -682,30 +871,22 @@ var QuizInfoPanel = function (_React$Component) {
           null,
           'Quiz Builder'
         ),
-        React.createElement('hr', null),
-        'Fields are saved automatically. Just type.',
-        React.createElement('br', null),
-        'Click on the \'\u2718\' next to answer to mark it true.',
-        React.createElement('br', null),
-        'Click on the \'\u2714\' next to answer to mark it false.',
-        React.createElement('br', null),
-        'Only one answer can be true at a time.',
-        React.createElement('hr', null),
-        'Unique URL:  ',
-        React.createElement('input', { id: 'quizName', type: 'text', value: "https://mtc-product-service-final.herokuapp.com/quizPlayer?quiz=" + quiz.publicId }),
         React.createElement(
           'div',
           null,
-          React.createElement('input', { id: 'quizName', type: 'text', name: 'title',
-            size: quiz.title.length || 25,
+          'Unique URL:  ',
+          React.createElement('input', { type: 'text', value: createQuizURL(quizInfo.publicId), readOnly: true })
+        ),
+        React.createElement('hr', null),
+        React.createElement(
+          'div',
+          null,
+          React.createElement(AutoExpandTextField, {
+            id: "quizName",
+            name: "title",
             placeholder: 'Type Quiz Title Here',
-            defaultValue: quiz.title,
-            onChange: function onChange(e) {
-              // Update length of field
-              e.target.size = e.target.value.length || 25;
-              // Update the name of the quiz
-              titleUpdater.update();
-            }
+            defaultValue: quizInfo.title,
+            onChange: titleUpdater.update
           })
         ),
         React.createElement('br', null),
@@ -717,17 +898,14 @@ var QuizInfoPanel = function (_React$Component) {
             null,
             'Description:'
           ),
-          React.createElement('textarea', { id: 'quizDescription', type: 'text', name: 'name',
-            defaultValue: quiz.description,
-            onChange: function onChange(e) {
-              // Update the quiz description
-              descriptionUpdater.update();
-              // Update the size of the text area
-              updateTextAreaSize(e.target);
-            }
+          React.createElement(AutoExpandTextArea, {
+            id: 'quizDescription',
+            name: 'name',
+            defaultValue: quizInfo.description,
+            onChange: descriptionUpdater.update
           })
         ),
-        React.createElement(QuestionListPanel, { questions: quiz.questions, loadQuestions: this.loadQuestions, csrf: this.props.csrf })
+        React.createElement(QuestionListPanel, { csrf: this.props.csrf })
       );
     }
   }]);
@@ -740,14 +918,121 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var AutoExpandTextArea = function (_React$Component) {
+  _inherits(AutoExpandTextArea, _React$Component);
+
+  function AutoExpandTextArea() {
+    _classCallCheck(this, AutoExpandTextArea);
+
+    var _this = _possibleConstructorReturn(this, (AutoExpandTextArea.__proto__ || Object.getPrototypeOf(AutoExpandTextArea)).call(this));
+
+    _this.updateSize = _this.updateSize.bind(_this);
+    $(window).resize(_this.updateSize);
+    return _this;
+  }
+
+  _createClass(AutoExpandTextArea, [{
+    key: "componentWillMount",
+    value: function componentWillMount() {
+      var _this2 = this;
+
+      setTimeout(function () {
+        window.requestAnimationFrame(_this2.updateSize);
+      }, 0);
+    }
+  }, {
+    key: "updateSize",
+    value: function updateSize() {
+      var textArea = $("#" + this.props.id)[0];
+      textArea.style.height = '0px';
+      textArea.style.height = textArea.scrollHeight + 5 + "px";
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this3 = this;
+
+      return React.createElement("textarea", {
+        id: this.props.id,
+        className: this.props.className,
+        type: "text",
+        name: this.props.name,
+        defaultValue: this.props.defaultValue,
+        placeholder: this.props.placeholder,
+        onChange: function onChange(e) {
+          _this3.updateSize();
+          _this3.props.onChange(e);
+        }
+      });
+    }
+  }]);
+
+  return AutoExpandTextArea;
+}(React.Component);
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var AutoExpandTextField = function (_React$Component) {
+  _inherits(AutoExpandTextField, _React$Component);
+
+  function AutoExpandTextField() {
+    _classCallCheck(this, AutoExpandTextField);
+
+    return _possibleConstructorReturn(this, (AutoExpandTextField.__proto__ || Object.getPrototypeOf(AutoExpandTextField)).apply(this, arguments));
+  }
+
+  _createClass(AutoExpandTextField, [{
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+
+      return React.createElement("input", {
+        id: this.props.id,
+        className: this.props.className,
+        type: "text",
+        name: this.props.name,
+        size: this.props.defaultValue ? this.props.defaultValue.length : this.props.placeholder ? this.props.placeholder.length : 0,
+        placeholder: this.props.placeholder,
+        defaultValue: this.props.defaultValue,
+        onChange: function onChange(e) {
+          // Update length of field
+          e.target.size = e.target.value.length || _this2.props.placeholder.length;
+          _this2.props.onChange(e);
+        }
+      });
+    }
+  }]);
+
+  return AutoExpandTextField;
+}(React.Component);
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 // Create a delay that can be restarted when updated another time.
 var DelayUpdateHandler = function () {
-  function DelayUpdateHandler(timeDelay, onDelay) {
+  function DelayUpdateHandler(timeDelay, onDelay, onUpdate) {
     _classCallCheck(this, DelayUpdateHandler);
 
     this.timer = {}; // time out handler
     this.timeDelay = timeDelay; // The time in milliseconds before the time out
+    this.onUpdate = onUpdate;
     this.onDelay = onDelay; // Function that is run when time out is done.
+
+    this.update = this.update.bind(this);
   }
 
   // Starts/Restarts timeout
@@ -760,6 +1045,11 @@ var DelayUpdateHandler = function () {
       if (this.timer) {
         window.clearTimeout(this.timer);
       }
+
+      if (this.onUpdate) {
+        this.onUpdate();
+      }
+
       this.timer = window.setTimeout(this.onDelay, this.timeDelay);
     }
   }]);
@@ -794,9 +1084,14 @@ var sendAjax = function sendAjax(type, action, data, success) {
   });
 };
 
-// Update the size of a text area
-var updateTextAreaSize = function updateTextAreaSize(_textArea) {
-  var textArea = _textArea;
-  textArea.style.height = '0px';
-  textArea.style.height = textArea.scrollHeight + 5 + 'px';
+var createQuizURL = function createQuizURL(publicId) {
+  return 'https://mtc-product-service-final.herokuapp.com/quizPlayer?quiz=' + publicId;
+};
+
+var setMessageSaving = function setMessageSaving() {
+  $('#quizSaveMessage').text('Saving...');
+};
+
+var setMessageSaved = function setMessageSaved() {
+  $('#quizSaveMessage').text('Database Up-To-Date');
 };

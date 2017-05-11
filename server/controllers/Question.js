@@ -80,6 +80,36 @@ const updateAnswerIsTrue = (request, response) =>
     .then(returnQuestion(request, response))
     .catch(onError(response));
 
+const updateAnswerNumeric = (request, response) =>
+  QuestionModels.Numeric
+    .updateAnswer(
+    request.session.quiz._id,
+    request.body.questionIndex,
+    request.body.answer
+    )
+    .then(returnQuestion(request, response))
+    .catch(onError(response));
+
+const updateAnswerError = (request, response) =>
+  QuestionModels.Numeric
+    .updateError(
+    request.session.quiz._id,
+    request.body.questionIndex,
+    request.body.error
+    )
+    .then(returnQuestion(request, response))
+    .catch(onError(response));
+
+const updateAnswerText = (request, response) =>
+  QuestionModels.Text
+    .updateAnswer(
+    request.session.quiz._id,
+    request.body.questionIndex,
+    request.body.answer
+    )
+    .then(returnQuestion(request, response))
+    .catch(onError(response));
+
 // Delete question
 const deleteQuestion = (request, response) =>
   QuestionModels.Base
@@ -90,11 +120,17 @@ const deleteQuestion = (request, response) =>
 module.exports = {
   getQuestions,
   getQuestion,
+
   buildQuestion,
   setQuestionType,
+
   updateQuestionTitle,
   updateQuestionContent,
   updateCorrectAnswer,
   updateAnswerIsTrue,
+  updateAnswerNumeric,
+  updateAnswerError,
+  updateAnswerText,
+
   deleteQuestion,
 };

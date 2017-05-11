@@ -1,38 +1,43 @@
 // Panel that holds an answer to the question
-class AnswerPanel extends React.Component {
+class AnswerMultipleChoicePanel extends React.Component {
   // Create initial data
   constructor() {
     super();
     this.state = {};
     this.state.data = {};
+
+    this.updateAnswer = this.updateAnswer.bind(this);
+    this.deleteAnswer = this.deleteAnswer.bind(this);
   }
 
   // Update this answer
   updateAnswer(content) {
-    const self = this;
     sendAjax(
       "PUT",
       '/updateAnswer',
       {
-        _csrf: self.props.csrf,
-        questionIndex: self.props.parent.props.parent.props.index,
-        answerIndex: self.props.index,
+        _csrf: this.props.csrf,
+        questionIndex: this.props.questionIndex,
+        answerIndex: this.props.index,
         content,
       }
-    );
+    ).then(setMessageSaved)
   }
+
+  // Delete answer from question
+  deleteAnswer() {
+    sendAjax('DELETE', '/deleteAnswer', {
+      _csrf: this.props.csrf,
+      questionIndex: this.props.questionIndex,
+      answerIndex: this.props.index,
+    }).then(this.props.onChange);
+  }
+
 
   // Render answer
   render() {
     const answer = this.props.answer;
-    const answerContentId = `answerContent_a${this.props.index}_q${this.props.parent.props.parent.props.index}`;
-
-    // Check if the answer is loaded
-    if (!answer) {
-      return (
-        <div> Answer Not Loaded</div>
-      )
-    }
+    const answerContentId = `answerContent_a${this.props.index}_q${this.props.questionIndex}`;
 
     // Updates the answer after the user has stopped typing for half a second.
     const answerUpdater =
@@ -40,7 +45,8 @@ class AnswerPanel extends React.Component {
         500,
         () => {
           this.updateAnswer($(`#${answerContentId}`).val())
-        }
+        },
+        setMessageSaving
       );
 
     // Final render
@@ -50,7 +56,7 @@ class AnswerPanel extends React.Component {
         <input type="button" className="quizBuilderButton"
           value={
             // Set the change correctness button icon
-            this.props.isCorrect ? "✔" : "✘"
+            this.props.question.correctAnswerIndex == this.props.index ? "✔" : "✘"
           }
           onClick={
             // Change the answer correctness
@@ -72,9 +78,7 @@ class AnswerPanel extends React.Component {
         />
         {/* On click delete answer*/}
         <input type="button" className="quizBuilderButton" value="Delete Answer"
-          onClick={
-            () => this.props.parent.deleteAnswer(this.props.index)
-          }
+          onClick={this.deleteAnswer}
         />
       </div>
     )

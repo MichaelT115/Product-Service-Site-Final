@@ -6,54 +6,52 @@ class QuestionPanel extends React.Component {
     this.state = {};
     this.state.data = {};
 
-    this.loadAnswers = this.loadAnswers.bind(this);
+    this.loadQuestions = this.loadQuestions.bind(this);
+    this.setQuestionType = this.setQuestionType.bind(this);
+    this.updateTitle = this.updateTitle.bind(this);
+    this.updateDescription = this.updateDescription.bind(this);
   }
 
-  loadAnswers() {
+  loadQuestions() {
     this.props.parent.loadQuestions();
+  }
+
+  setQuestionType(e) {
+    sendAjax(
+      "PUT",
+      '/setQuestionType',
+      {
+        _csrf: this.props.csrf,
+        questionIndex: this.props.index,
+        type: e.target.value,
+      }
+    ).then(this.loadQuestions)
   }
 
   // Update title of question
   updateTitle(title) {
-    const self = this;
     sendAjax(
       "PUT",
       '/updateQuestionTitle',
       {
-        _csrf: self.props.csrf,
-        index: self.props.index,
+        _csrf: this.props.csrf,
+        index: this.props.index,
         title,
       }
-    );
+    ).then(setMessageSaved);
   }
 
   // Update description of question
   updateDescription(content) {
-    const self = this;
     sendAjax(
       "PUT",
       '/updateQuestionContent',
       {
-        _csrf: self.props.csrf,
-        index: self.props.index,
+        _csrf: this.props.csrf,
+        index: this.props.index,
         content,
       }
-    );
-  }
-
-  // Update the correct answer of the question
-  updateCorrectAnswer(answerIndex, isCorrect) {
-    const self = this;
-    sendAjax(
-      "PUT",
-      '/updateQuestionCorrectAnswer',
-      {
-        _csrf: self.props.csrf,
-        questionIndex: self.props.index,
-        answerIndex: answerIndex,
-        isCorrect,
-      }
-    ).then(self.loadAnswers)
+    ).then(setMessageSaved);
   }
 
   // Render question
@@ -69,24 +67,14 @@ class QuestionPanel extends React.Component {
       )
     }
 
-    // The resize requires that the DOM element itself is rendered
-    // This means that we have to wait for the first frame to be rendered.
-    setTimeout(() => {
-      window.requestAnimationFrame(() => {
-        const questionFields = $(".questionDescription").toArray();
-        questionFields.forEach(function (descriptionField) {
-          updateTextAreaSize(descriptionField);
-        }, this);
-      })
-    }, 0);
-
     // Updates the question's title after the user has stopped typing for half a second.
     const titleUpdater =
       new DelayUpdateHandler(
         500,
         () => {
           this.updateTitle($(`#${questionTitleId}`).val())
-        }
+        },
+        setMessageSaving
       );
     // Updates the question's description after the user has stopped typing for half a second.
     const contentUpdater =
@@ -94,11 +82,49 @@ class QuestionPanel extends React.Component {
         500,
         () => {
           this.updateDescription($(`#${questionDescriptionId}`).val())
-        }
+        },
+        setMessageSaving
       );
 
+    let answerPanel;
+    switch (question.type) {
+      case "MultipleChoice":
+        answerPanel = (<AnswerMultipleChoiceListPanel
+          index={this.props.index}
+          question={question}
+          onChange={this.loadQuestions}
+          csrf={this.props.csrf} />);
+        break;
 
-    const self = this;
+      case "TrueFalse":
+        answerPanel = (<AnswerTrueFalsePanel
+          index={this.props.index}
+          question={question}
+          onChange={this.loadQuestions}
+          csrf={this.props.csrf}
+        />);
+        break;
+
+        case "Numeric":
+        answerPanel = (<AnswerNumericPanel
+          index={this.props.index}
+          question={question}
+          onChange={this.loadQuestions}
+          csrf={this.props.csrf}
+        />);
+        break;
+
+        default:
+        case "Text":
+        answerPanel = (<AnswerTextPanel
+          index={this.props.index}
+          question={question}
+          onChange={this.loadQuestions}
+          csrf={this.props.csrf}
+        />);
+        break;
+    }
+
     return (
       <div className="questionPanel">
         <span>Question {this.props.index + 1}:</span>
@@ -108,20 +134,9 @@ class QuestionPanel extends React.Component {
             () => this.props.parent.deleteQuestion(this.props.index)
           }
         />
-        <select defaultValue={question.__t}
-          onChange={
-            (e) => {
-              sendAjax(
-                "PUT",
-                '/setQuestiontype',
-                {
-                  _csrf: self.props.csrf,
-                  questionIndex: self.props.index,
-                  type: e.target.value,
-                }
-              ).then(self.loadAnswers)
-            }
-          }
+        <select
+          defaultValue={question.type}
+          onChange={this.setQuestionType}
         >
           <option value="MultipleChoice">Multiple Choice</option>
           <option value="TrueFalse">True or False</option>
@@ -131,72 +146,29 @@ class QuestionPanel extends React.Component {
         <hr />
         <div>
           <label> Title: </label>
-          <input id={questionTitleId} className="questionTitle" type="text" name="name"
-            defaultValue={decodeURI(question.title || "")}
+          <AutoExpandTextField
+            id={questionTitleId}
+            className="questionTitle"
+            name="name"
             placeholder="Enter Title for Question"
-            size={question.title ? question.title.length || 20 : 20}
-            onChange={
-              (e) => {
-                // Update field size
-                e.target.size = e.target.value.length || 20;
-
-                // Update title
-                titleUpdater.update();
-              }
-            }
+            defaultValue={this.props.question.title}
+            onChange={titleUpdater.update}
           />
-          <br />
         </div>
         <div>
           <label>Question:</label>
           <br />
-          <textarea id={questionDescriptionId} className="questionDescription" type="text" name="content"
+          <AutoExpandTextArea
+            id={questionDescriptionId}
+            className="questionDescription"
+            name="content"
             placeholder="Enter description"
             defaultValue={question.content}
-            onChange={
-              (e) => {
-                // Update description
-                contentUpdater.update();
-
-                // Update text area size
-                updateTextAreaSize(e.target);
-              }
-            } />
+            onChange={contentUpdater.update}
+          />
           <br />
         </div>
-        {/* List the answers to the question */}
-        {
-          (() => {
-            switch (question.type) {
-              case "TrueFalse":
-                return (
-                  <input type="button" className="quizBuilderButton"
-                    value={
-                      // Set the change correctness button icon
-                      question.isTrue ? "✔" : "✘"
-                    }
-                    onClick={
-                      // Change the answer correctness
-                      (e) => {
-                        sendAjax(
-                          "PUT",
-                          '/updateAnswerIsTrue',
-                          {
-                            _csrf: self.props.csrf,
-                            questionIndex: self.props.index,
-                            isTrue: !question.isTrue,
-                          }
-                        ).then(self.loadAnswers)
-                      }
-                    }
-                  />
-                )
-              case "MultipleChoice":
-              default:
-                return (<AnswerListPanel answers={question.answers} parent={self} correctAnswer={question.correctAnswerIndex} csrf={this.props.csrf} />);
-            }
-          })()
-        }
+        {answerPanel}
       </div>
     )
   }
