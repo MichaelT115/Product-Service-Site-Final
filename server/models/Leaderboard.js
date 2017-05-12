@@ -7,9 +7,10 @@ let LeaderboardEntryModel = {};
 
 const LeaderboardEntrySchema = new mongoose.Schema({
   // Human-readable label for the account
-  quiz: {
-    type: String,
+  player: {
+    type: mongoose.Schema.ObjectId,
     required: true,
+    ref: 'Account',
   },
 
   score: {

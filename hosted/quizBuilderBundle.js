@@ -340,7 +340,7 @@ var AnswerTextPanel = function (_React$Component) {
       var _this2 = this;
 
       var question = this.props.question;
-      var answerContentId = "answerContent_text_q" + this.props.questionIndex;
+      var answerContentId = "answerContent_text_q" + this.props.index;
 
       // Updates the answer after the user has stopped typing for half a second.
       var answerUpdater = new DelayUpdateHandler(500, function () {
@@ -1085,7 +1085,7 @@ var sendAjax = function sendAjax(type, action, data, success) {
 };
 
 var createQuizURL = function createQuizURL(publicId) {
-  return 'https://mtc-product-service-final.herokuapp.com/quizPlayer?quiz=' + publicId;
+  return window.location.host + '/quizPlayer?quiz=' + publicId;
 };
 
 var setMessageSaving = function setMessageSaving() {

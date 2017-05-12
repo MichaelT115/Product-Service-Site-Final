@@ -5,6 +5,8 @@ class QuizListPanel extends React.Component {
     super();
     this.state = {};
     this.state.data = {};
+
+    this.loadQuizzes = this.loadQuizzes.bind(this);
   }
 
   // Loads the quizzes once the object is rendered
@@ -18,27 +20,18 @@ class QuizListPanel extends React.Component {
 
     // Loads both quiz info and current account info
     $.when(
-      // Get quiz ids
-      sendAjax('GET', '/getQuizzes', { _csrf: this.props.csrf }),
+      sendAjax('GET', '/getQuizzesInfo', { _csrf: this.props.csrf }),
       // Get the current account info - take from what is in session.
       sendAjax('GET', '/getCurrentAccount', { _csrf: this.props.csrf })
     ).done((quizzesData, accountData) => {
       // Set the state with this data
       self.setState({
         data: {
-          quizzes: quizzesData[0].quizzes,  // Array of quiz ids
+          quizzes: quizzesData[0],  // Array of quiz ids
           account: accountData[0].account,  // Current account data
         },
       });
     });
-  }
-
-  // Delete a quiz
-  deleteQuiz(questionId) {
-    const self = this;
-    // Sends delete request
-    sendAjax('DELETE', '/deleteQuiz', { _csrf: this.props.csrf, _id: questionId })
-      .then(self.loadQuizzes);  // Reload the quiz data
   }
 
   render() {
@@ -60,13 +53,13 @@ class QuizListPanel extends React.Component {
     // Goes through each quiz
     // Divides them between user made quizzes and those made by other users.
     quizzes.forEach((quiz, index) => {
-      if (quiz.creator === this.state.data.account._id) {
+      if (quiz.isCreation) {
         userQuizNodes.push(
-          <QuizPanel key={quiz._id} index={index + 1} quiz={quiz} parent={self} csrf={self.props.csrf} isUser={true} />
+          <QuizPanel key={quiz.publicId} index={index} quiz={quiz} onChange={self.loadQuizzes} csrf={self.props.csrf} />
         );
       } else {
         otherQuizNodes.push(
-          <QuizPanel key={quiz._id} index={index + 1} quiz={quiz} parent={self} csrf={self.props.csrf} isUser={false} />
+          <QuizPanel key={quiz.publicId} index={index} quiz={quiz} onChange={self.loadQuizzes} csrf={self.props.csrf} />
         );
       }
     });

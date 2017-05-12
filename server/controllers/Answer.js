@@ -10,18 +10,19 @@ const returnAnswer = (request, response) => (quiz) =>
       .answers[request.body.answerIndex],
   });
 
-const returnAnswers = (request, response) => (quiz) =>
-  response.json({
-    answers:
-    quiz
-      .questions[request.body.questionIndex]
-      .answers,
-  });
+const returnAnswers = (request, response) => (answers) =>
+  response.json(answers);
 
 const onError = (response) => (error) => {
   console.log(error);
   return response.status(400).json({ error: 'An error occurred' });
 };
+
+const getAnswers = (request, response) =>
+  AnswerModel
+    .findAll(request.session.quiz._id, request.query.question)
+    .then(returnAnswers(request, response))
+    .catch(onError(response));
 
 // Create new answer
 const buildAnswer = (request, response) =>
@@ -58,6 +59,7 @@ const deleteAnswer = (request, response) =>
     .catch(onError(response));
 
 module.exports = {
+  getAnswers,
   buildAnswer,
   updateAnswerContent,
   deleteAnswer,

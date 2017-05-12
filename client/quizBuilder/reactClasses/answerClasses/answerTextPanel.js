@@ -22,7 +22,7 @@ class AnswerTextPanel extends React.Component {
   // Render answer
   render() {
     const question = this.props.question;
-    const answerContentId = `answerContent_text_q${this.props.questionIndex}`;
+    const answerContentId = `answerContent_text_q${this.props.index}`;
 
     // Updates the answer after the user has stopped typing for half a second.
     const answerUpdater =
@@ -33,17 +33,17 @@ class AnswerTextPanel extends React.Component {
         },
         setMessageSaving
       );
- 
+
     // Final render
     return (
       <div className="answerPanel">
         <AutoExpandTextField
-            id={answerContentId}
-            className="questionTitle"
-            placeholder="Type Answer Here"
-            defaultValue={question.answer}
-            onChange={answerUpdater.update}
-          />
+          id={answerContentId}
+          className="questionTitle"
+          placeholder="Type Answer Here"
+          defaultValue={question.answer}
+          onChange={answerUpdater.update}
+        />
       </div>
     )
   }

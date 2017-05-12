@@ -27,12 +27,15 @@ QuizSchema.statics.getInfo = (doc) => ({
   publicId: doc.publicId,
   title: doc.title,
   description: doc.description,
+  creator: doc.creator.username,
+  questionCount: doc.questions.length,
 });
 
 // Get all quizzes
 QuizSchema.statics.findAll = () =>
   QuizModel
     .find({})
+    .populate('creator', 'username')
     .exec();
 
 // Get all quiz ids
@@ -46,6 +49,14 @@ QuizSchema.statics.findAllIds = () =>
 QuizSchema.statics.findByQuizId = (quizId) =>
   QuizModel
     .findById(quizId)
+    .populate('creator', 'username')
+    .exec();
+
+// Find quiz by public quiz Id
+QuizSchema.statics.findByPublicId = (publicId) =>
+  QuizModel
+    .findOne({ publicId })
+    .populate('creator', 'username')
     .exec();
 
 // Find quiz by creator's account id
@@ -54,6 +65,7 @@ QuizSchema.statics.findByCreator = (creatorId) =>
     .find({
       creator: convertId(creatorId),
     })
+    .populate('creator', 'username')
     .exec();
 
 // Update title of quiz
@@ -83,9 +95,24 @@ QuizSchema.statics.deleteById = (quizId) =>
   QuizModel
     .remove({ _id: quizId })
     .exec();
+// Delete quiz by publicId
+QuizSchema.statics.deleteById = (publicId) =>
+  QuizModel
+    .remove({ publicId })
+    .exec();
 
 
 QuestionSchemas.Base.QuestionSchema.statics = {
+  // Everything except the answer
+  getInfo: (doc) => ({
+    id: doc.id,
+    type: doc.type,
+    title: doc.title,
+    content: doc.content,
+    reward: doc.reward,
+    penalty: doc.penalty,
+  }),
+
   // General Question statics
   findAll: (quizId) =>
     QuizModel

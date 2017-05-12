@@ -5,4 +5,4 @@ deployment:
   staging:
     branch: master
     heroku:
-      appname: mtc-product-service-prototype
+      appname: mtc-product-service-final

@@ -1,9 +1,19 @@
 const models = require('../models');
+const QuizController = require('./Quiz');
 
 const Quiz = models.Quiz;
 
+const onError = (response) => (error) => {
+  console.log(error);
+  return response.status(400).json({ error: 'An error occurred' });
+};
+
 // Get Quiz Builder page
-const quizBuilderPage = (req, res) => res.render('quizBuilder', { csrfToken: req.csrfToken() });
+const quizBuilderPage = (request, response) =>
+  Quiz.QuizModel.findByPublicId(request.query.quiz)
+    .then(QuizController.selectQuiz(request))
+    .then(() => response.render('quizBuilder', { csrfToken: request.csrfToken() }))
+    .catch(onError(response));
 
 // Create new quiz
 const buildQuiz = (request, response) => {
@@ -27,8 +37,7 @@ const buildQuiz = (request, response) => {
 
   // On quiz saved to database, redirect to quiz builder
   quizPromise.then(() => {
-    req.session.quiz = Quiz.QuizModel.toAPI(newQuiz);
-    res.json({ redirect: '/quizBuilder' });
+    res.json({ redirect: `/quizBuilder?quiz=${newQuiz.publicId}` });
   });
 
   quizPromise.catch((err) => {

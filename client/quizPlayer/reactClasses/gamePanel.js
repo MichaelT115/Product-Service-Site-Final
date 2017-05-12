@@ -9,29 +9,32 @@ class GamePanel extends React.Component {
       score: 0,
       currentIndex: 0,
     };
+    this.state.ad = {};
+
+    this.loadQuizInfo = this.loadQuizInfo.bind(this);
+    this.nextQuestion = this.nextQuestion.bind(this);
+    this.addScore = this.addScore.bind(this);
   }
 
   // When the component is rendered, load quiz and question IDs.
   componentDidMount() {
-    const self = this;
+    this.loadQuizInfo();
+  }
 
-    // Load quiz and question IDs
-    $.when(
-      sendAjax('GET', '/getQuiz', { _csrf: this.props.csrf, }),
-      sendAjax('GET', '/getQuestionIds', { _csrf: this.props.csrf, })
-    ).done((quizData, questionsData) => {
-      // Change state with new data
-      self.setState({
-        data: {
-          quiz: {
-            _id: quizData[0].quiz._id,
-            name: _.unescape(quizData[0].quiz.name || ""), // Handles escape characters
-            description: _.unescape(quizData[0].quiz.description || ""),
+  loadQuizInfo() {
+    sendAjax('GET', '/getQuizInfo')
+      .then((quizInfo) => {
+        // Set state of quiz
+        this.setState({
+          data: {
+            quizInfo
           },
-          questions: questionsData[0].questionIds
-        },
+          ad: {
+            hasSeenAd: false,
+            adIndex: Math.round(Math.random() * quizInfo.questionCount),
+          }
+        });
       });
-    });
   }
 
   // Add score to game
@@ -43,11 +46,11 @@ class GamePanel extends React.Component {
   // Move to next question
   nextQuestion() {
     const game = this.state.game;
-    const questions = this.state.data.questions;
+    const questionCount = this.state.data.quizInfo.questionCount;
 
     // Change the current question index
     game.currentIndex += 1;
-    if (game.currentIndex >= questions.length) {
+    if (game.currentIndex >= questionCount) {
       game.currentIndex = -1;
     }
 
@@ -58,15 +61,11 @@ class GamePanel extends React.Component {
   // Render game
   render() {
     const self = this;
-    const questions = this.state.data.questions;
-    const quiz = this.state.data.quiz;
+    const quizInfo = this.state.data.quizInfo;
     const game = this.state.game;
 
-    // Check if the quiz is loaded
-    if (!(quiz && questions)) {
-      return (
-        <div>Question Not Loaded</div>
-      )
+    if (!quizInfo) {
+      return <div>Test</div>
     }
 
     // Check if the game is over, and render the game over screen
@@ -79,11 +78,29 @@ class GamePanel extends React.Component {
       );
     }
 
+    // Render advertising
+    if (!this.state.ad.hasSeenAd && game.currentIndex === this.state.ad.adIndex)
+      return (
+        <div className="questionPanel">
+          <h1>ADVERTISEMENT - HAVE TO MAKE MONEY SOMEHOW</h1>
+          <input type="button" className="quizBuilderButton"
+            value={"Message Internalized"}
+            onClick={() => this.setState({ ad: { hasSeenAd: false } })}
+          />
+        </div>
+      )
+
     // Render game
     return (
       <div className="questionPanel">
-        <GameInfoPanel quiz={this.state.data.quiz} questions={this.state.data.questions} game={this.state.game} />
-        <QuestionPanel key={questions[game.currentIndex]._id} index={game.currentIndex + 1} _id={questions[game.currentIndex]._id} parent={self} csrf={self.props.csrf} />
+        <GameInfoPanel quizInfo={quizInfo} game={game} />
+        <QuestionPanel
+          key={game.currentIndex}
+          quizInfo={quizInfo}
+          game={game}
+          nextQuestion={this.nextQuestion}
+          addScore={this.addScore}
+        />
       </div>
     )
   }

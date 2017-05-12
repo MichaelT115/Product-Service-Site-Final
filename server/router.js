@@ -25,9 +25,9 @@ const router = (app) => {
 
   // --- Quiz --- //
   // Selects a quiz then redirects to the quiz player
-  app.post('/playQuiz', mid.requiresSecure, controllers.Quiz.playQuiz);
+  app.get('/playQuiz', mid.requiresSecure, controllers.Quiz.playQuiz);
   // Selects a quiz then redirects to the quiz editor
-  app.post('/editQuiz', mid.requiresSecure, controllers.Quiz.editQuiz);
+  app.get('/editQuiz', mid.requiresSecure, controllers.Quiz.editQuiz);
   // Deletes a quiz based of quiz id with associated questions and answers
   app.delete('/deleteQuiz', mid.requiresSecure, controllers.Quiz.deleteQuiz);
   // Gets a list of quizzes
@@ -41,6 +41,12 @@ const router = (app) => {
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Quiz.getQuizInfo
+  );
+  app.get(
+    '/getQuizzesInfo',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Quiz.getQuizzesInfo
   );
   // Update quiz title
   app.put(
@@ -72,6 +78,33 @@ const router = (app) => {
     mid.requiresQuizSelected,
     controllers.Question.getQuestion
   );
+
+  // // Check Answer
+  app.get(
+    '/getIsCorrectAnswer',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Question.getIsCorrectAnswer
+  );
+  app.get(
+    '/getIsAnswerIsTrue',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Question.getIsAnswerIsTrue
+  );
+  app.get(
+    '/getIsAnswerNumeric',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Question.getIsAnswerNumeric
+  );
+  app.get(
+    '/getIsAnswerText',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Question.getIsAnswerText
+  );
+
   // Create a new question
   app.post(
     '/buildQuestion',
@@ -144,6 +177,12 @@ const router = (app) => {
 
   // --- Answers --- //
   // Create new answer based off question id
+  app.get(
+    '/getAnswers',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Answer.getAnswers
+  );
   app.post(
     '/buildAnswer',
     mid.requiresSecure,

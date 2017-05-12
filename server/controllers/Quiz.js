@@ -29,30 +29,53 @@ const getQuizInfo = (request, response) =>
     .then((quiz) => response.json(Quiz.QuizModel.getInfo(quiz)))
     .catch(onError(response));
 
+const getQuizzesInfo = (request, response) =>
+  Quiz.QuizModel.findAll()
+    .then((quizzes) => {
+      // Get quiz info
+      const quizzesInfo = quizzes.map((quiz) => {
+        const quizInfo = Quiz.QuizModel.getInfo(quiz);
+
+        // Add in field telling client if the current account is the creator
+        quizInfo.isCreation = quiz.creator._id.equals(request.session.account._id);
+        return quizInfo;
+      });
+
+      // Return Quizzes
+      return response.json(quizzesInfo);
+    })
+    .catch(onError(response));
+
 // Select quiz then redirect to quiz player
 const playQuiz = (request, response) =>
-  Quiz.QuizModel.findByQuizId(request.body.quizId)
-    .then(selectQuiz(request))
-    .then(() => response.json({ redirect: '/quizPlayer' }))
+  Quiz.QuizModel.findByPublicId(request.query.quiz)
+    .then(() => response.json({ redirect: `/quizPlayer?quiz=${request.query.quiz}` }))
     .catch(onError(response));
 
 // Select quiz then redirect to quizBuilder
-const editQuiz = (request, response) => Quiz.QuizModel.findByQuizId(request.body.quizId)
-  .then(selectQuiz(request))
-  .then(() => response.json({ redirect: '/quizBuilder' }))
-  .catch(onError(response));
+const editQuiz = (request, response) =>
+  Quiz.QuizModel.findByPublicId(request.query.quiz)
+    .then(() => response.json({
+      redirect: `/quizBuilder?quiz=${request.query.quiz}`,
+    }))
+    .catch(onError(response));
 
 // Delete quiz
 const deleteQuiz = (request, response) =>
-  Quiz.QuizModel.deleteById(request.body.quizId)
+  Quiz.QuizModel.deleteById(request.body.publicId)
     .then(() => response.json({ redirect: '/main' }))
     .catch(onError(response));
 
 module.exports = {
   getQuizzes,
   getQuiz,
+
+  getQuizzesInfo,
   getQuizInfo,
+
   playQuiz,
   editQuiz,
   deleteQuiz,
+
+  selectQuiz,
 };

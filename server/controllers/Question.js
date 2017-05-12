@@ -19,10 +19,44 @@ const getQuestions = (request, response) =>
     .then((questions) => response.json({ questions }))
     .catch(onError(response));
 
-// Get question by question id
+// Get question by quiz id and question index
 const getQuestion = (request, response) =>
-  QuestionModels.Base.findByIndex(request.query.questionId)
-    .then((question) => response.json({ question }))
+  QuestionModels.Base.findByIndex(request.session.quiz._id, request.query.question)
+    .then((question) => response.json(QuestionModels.Base.getInfo(question)))
+    .catch(onError(response));
+
+
+// Check Answers
+const getIsCorrectAnswer = (request, response) =>
+  QuestionModels.Base.findByIndex(request.session.quiz._id, request.query.question)
+    .then((question) =>
+      response.json({
+        isCorrect: question.correctAnswerIndex === JSON.parse(request.query.answer),
+      }))
+    .catch(onError(response));
+
+const getIsAnswerIsTrue = (request, response) =>
+  QuestionModels.Base.findByIndex(request.session.quiz._id, request.query.question)
+    .then((question) =>
+      response.json({
+        isCorrect: question.isTrue === JSON.parse(request.query.answer),
+      }))
+    .catch(onError(response));
+
+const getIsAnswerNumeric = (request, response) =>
+  QuestionModels.Base.findByIndex(request.session.quiz._id, request.query.question)
+    .then((question) =>
+      response.json({
+        isCorrect: Math.abs(question.answer - JSON.parse(request.query.answer)) <= question.error,
+      }))
+    .catch(onError(response));
+
+const getIsAnswerText = (request, response) =>
+  QuestionModels.Base.findByIndex(request.session.quiz._id, request.query.question)
+    .then((question) =>
+      response.json({
+        isCorrect: question.answer.toLowerCase() === request.query.answer.toLowerCase(),
+      }))
     .catch(onError(response));
 
 // Build question
@@ -126,11 +160,17 @@ module.exports = {
 
   updateQuestionTitle,
   updateQuestionContent,
+
   updateCorrectAnswer,
   updateAnswerIsTrue,
   updateAnswerNumeric,
   updateAnswerError,
   updateAnswerText,
+
+  getIsCorrectAnswer,
+  getIsAnswerIsTrue,
+  getIsAnswerNumeric,
+  getIsAnswerText,
 
   deleteQuestion,
 };

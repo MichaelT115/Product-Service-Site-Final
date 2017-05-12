@@ -23,7 +23,7 @@ const sendAjax = (type, action, data, success) => $.ajax({
 });
 
 const createQuizURL = (publicId) =>
-  `https://mtc-product-service-final.herokuapp.com/quizPlayer?quiz=${publicId}`;
+  `${window.location.host}/quizPlayer?quiz=${publicId}`;
 
 const setMessageSaving = () => {
   $('#quizSaveMessage').text('Saving...');

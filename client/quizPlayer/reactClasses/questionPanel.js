@@ -5,49 +5,92 @@ class QuestionPanel extends React.Component {
     super();
     this.state = {};
     this.state.data = {};
+
+    this.getQuestion = this.getQuestion.bind(this);
+    this.pickAnswerPanel = this.pickAnswerPanel.bind(this);
   }
 
   // When the component is loaded, load the question
   componentDidMount() {
-    const self = this;
-    sendAjax('GET', `/getQuestion?questionId=${this.props._id}`, { _csrf: this.props.csrf })
-      .then(this.updateStateQuestion.bind(self));
+    this.getQuestion();
   }
 
-  // Update the state with the question
-  updateStateQuestion(response) {
-    const question = response.question;
-
-    this.setState({
-      data: {
-        question: {
-          title: _.unescape(question.title),
-          description: _.unescape(question.description),
-          correctAnswer: question.correctAnswer,
-        }
-      }
-    });
+  getQuestion() {
+    sendAjax('GET', `/getQuestion?question=${this.props.game.currentIndex}`, { _csrf: this.props.csrf })
+      .then((question) => {
+        this.setState({ data: { question } });
+      });
   }
 
-  // Submit answer
-  submitAnswer(answerId) {
-    // Check if the answer is correct
-    const isCorrect = answerId === this.state.data.question.correctAnswer;
+  pickAnswerPanel() {
+    let answerPanel;
+    switch (this.state.data.question.type) {
+      case "MultipleChoice":
+        answerPanel = (
+          <AnswerMultipleChoiceListPanel
+            index={this.props.game.currentIndex}
+            onCorrectAnswer={
+              () => {
+                this.props.addScore(25)
+                this.props.nextQuestion();
+              }
+            }
+            onWrongAnswer={() => { this.props.addScore(-5) }}
+            csrf={this.props.csrf}
+          />);
+        break;
 
-    if (isCorrect) {
-      this.props.parent.addScore(100);
-      this.props.parent.nextQuestion();
-    } else {
-      this.props.parent.addScore(-25);
+      case "TrueFalse":
+        answerPanel = (<AnswerTrueFalsePanel
+          index={this.props.game.currentIndex}
+          onCorrectAnswer={
+            () => {
+              this.props.addScore(25)
+              this.props.nextQuestion();
+            }
+          }
+          onWrongAnswer={() => { this.props.addScore(-5) }}
+          csrf={this.props.csrf}
+        />);
+        break;
+
+      case "Numeric":
+        answerPanel = (<AnswerNumericPanel
+          index={this.props.game.currentIndex}
+          onCorrectAnswer={
+            () => {
+              this.props.addScore(25)
+              this.props.nextQuestion();
+            }
+          }
+          onWrongAnswer={() => { this.props.addScore(-5) }}
+          csrf={this.props.csrf}
+        />);
+        break;
+
+      default:
+      case "Text":
+        answerPanel = (<AnswerTextPanel
+          index={this.props.game.currentIndex}
+          onCorrectAnswer={
+            () => {
+              this.props.addScore(25)
+              this.props.nextQuestion();
+            }
+          }
+          onWrongAnswer={() => { this.props.addScore(-5) }}
+          csrf={this.props.csrf}
+        />);
+        break;
     }
 
-    return isCorrect;
+    return answerPanel;
   }
 
   // Render question
   render() {
-    const self = this;
     const question = this.state.data.question;
+    const index = this.props.game.currentIndex;
 
     // Check if the question is loaded
     if (!question) {
@@ -57,15 +100,15 @@ class QuestionPanel extends React.Component {
     /// Render question
     return (
       <div className="questionPanel">
-        {this.props.index}. {question.title}
+        {index + 1}. {question.title}
         {
           // Make sure there are line breaks. Based off: http://stackoverflow.com/questions/35351706/how-to-render-a-multi-line-text-string-in-react
-          question.description.split("\n").map((line, index) => {
+          question.content.split("\n").map((line, index) => {
             return <p key={index}>{line}</p>;
           })
         }
         {/* Render list of answers */}
-        <AnswerListPanel _id={this.props._id} parent={self} correctAnswer={question.correctAnswer} csrf={this.props.csrf} />
+        {this.pickAnswerPanel()}
       </div>
     )
   }
