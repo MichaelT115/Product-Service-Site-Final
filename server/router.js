@@ -45,7 +45,6 @@ const router = (app) => {
   app.get(
     '/getQuizzesInfo',
     mid.requiresSecure,
-    mid.requiresQuizSelected,
     controllers.Quiz.getQuizzesInfo
   );
   // Update quiz title
@@ -222,14 +221,14 @@ const router = (app) => {
   app.get(
     '/quizBuilder',
     mid.requiresSecure,
-    mid.requiresQuizSelected,
+    mid.requiresLogin,
     controllers.QuizBuilder.quizBuilderPage
   );
   // Load the quiz player view
   app.get(
     '/quizPlayer',
     mid.requiresSecure,
-    mid.requiresQuizSelected,
+    mid.requiresLogin,
     controllers.QuizPlayer.quizPlayerPage
   );
   // Redirect non-existent pages to either the app page or the login page.

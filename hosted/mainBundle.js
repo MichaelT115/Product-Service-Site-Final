@@ -274,6 +274,169 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+// Panel that holds settings for the user to edit
+var UserSettingPanel = function (_React$Component) {
+  _inherits(UserSettingPanel, _React$Component);
+
+  function UserSettingPanel() {
+    _classCallCheck(this, UserSettingPanel);
+
+    var _this = _possibleConstructorReturn(this, (UserSettingPanel.__proto__ || Object.getPrototypeOf(UserSettingPanel)).call(this));
+
+    _this.state = {};
+    // Pre-make data object
+    _this.state.data = {};
+    return _this;
+  }
+
+  // When this is rendered, load the account
+
+
+  _createClass(UserSettingPanel, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.loadAccount();
+    }
+
+    // Load account data  
+
+  }, {
+    key: 'loadAccount',
+    value: function loadAccount() {
+      var self = this;
+      sendAjax('GET', '/getCurrentAccount', { _csrf: this.props.csrf }).then(function (data) {
+        self.setState({
+          data: {
+            account: data.account
+          }
+        });
+      });
+    }
+
+    // Update the user name
+
+  }, {
+    key: 'updateUsername',
+    value: function updateUsername(e) {
+      e.preventDefault();
+
+      // Check if a new username is entered.
+      if ($('#user').val() == '') {
+        handleError('Enter new username');
+        return false;
+      }
+
+      // Send update request
+      sendAjax('PUT', $('#usernameForm').attr('action'), $('#usernameForm').serialize(), redirect);
+
+      return false;
+    }
+  }, {
+    key: 'updatePassword',
+
+
+    // Update the user's password
+    value: function updatePassword(e) {
+      e.preventDefault();
+
+      // Check the password fields
+      if ($('#password').val() === '' || $('#password2').val() === '') {
+        handleError('All fields are required.');
+        return false;
+      }
+
+      // Check if the passwords are equal
+      if ($('#password').val() !== $('#password2').val()) {
+        handleError('Make sure the password fields match.');
+        return false;
+      }
+
+      // Send updated password request
+      sendAjax('PUT', $('#passwordForm').attr('action'), $('#passwordForm').serialize(), redirect);
+
+      return false;
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var account = this.state.data.account;
+
+      // Check if the account data is loaded
+      if (!account) {
+        return React.createElement(
+          'div',
+          { className: 'panel' },
+          'Loading Account Info'
+        );
+      }
+
+      /// Render account options 
+      return React.createElement(
+        'div',
+        { className: 'panel' },
+        React.createElement(
+          'h2',
+          null,
+          'Username: ',
+          account.username
+        ),
+        React.createElement('hr', null),
+        React.createElement(
+          'form',
+          {
+            id: 'usernameForm',
+            onSubmit: this.updateUsername,
+            action: '/updateUsername',
+            method: 'PUT'
+          },
+          React.createElement(
+            'label',
+            { htmlFor: 'name' },
+            'Change Username'
+          ),
+          React.createElement('br', null),
+          React.createElement('input', { id: 'user', type: 'text', name: 'user', placeholder: 'New User Name' }),
+          React.createElement('input', { type: 'hidden', name: '_csrf', value: this.props.csrf }),
+          React.createElement('input', { type: 'submit', value: 'Change Username' })
+        ),
+        React.createElement(
+          'form',
+          {
+            id: 'passwordForm',
+            onSubmit: this.updatePassword,
+            action: '/updatePassword',
+            method: 'PUT'
+          },
+          React.createElement(
+            'label',
+            { htmlFor: 'name' },
+            'Change Password'
+          ),
+          React.createElement('br', null),
+          React.createElement('input', { id: 'password', type: 'text', name: 'password', placeholder: 'New Password' }),
+          React.createElement('br', null),
+          React.createElement('input', { id: 'password2', type: 'text', name: 'password2', placeholder: 'Repeat New Password' }),
+          React.createElement('br', null),
+          React.createElement('input', { type: 'hidden', name: '_csrf', value: this.props.csrf }),
+          React.createElement('input', { type: 'submit', value: 'Change Password' })
+        ),
+        React.createElement('div', { id: 'errorMessage' })
+      );
+    }
+  }]);
+
+  return UserSettingPanel;
+}(React.Component);
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 // Panel that holds the list of quizzes
 var QuizListPanel = function (_React$Component) {
   _inherits(QuizListPanel, _React$Component);
@@ -503,169 +666,6 @@ var QuizPanel = function (_React$Component) {
 
   return QuizPanel;
 }(React.Component);
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-// Panel that holds settings for the user to edit
-var UserSettingPanel = function (_React$Component) {
-  _inherits(UserSettingPanel, _React$Component);
-
-  function UserSettingPanel() {
-    _classCallCheck(this, UserSettingPanel);
-
-    var _this = _possibleConstructorReturn(this, (UserSettingPanel.__proto__ || Object.getPrototypeOf(UserSettingPanel)).call(this));
-
-    _this.state = {};
-    // Pre-make data object
-    _this.state.data = {};
-    return _this;
-  }
-
-  // When this is rendered, load the account
-
-
-  _createClass(UserSettingPanel, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      this.loadAccount();
-    }
-
-    // Load account data  
-
-  }, {
-    key: 'loadAccount',
-    value: function loadAccount() {
-      var self = this;
-      sendAjax('GET', '/getCurrentAccount', { _csrf: this.props.csrf }).then(function (data) {
-        self.setState({
-          data: {
-            account: data.account
-          }
-        });
-      });
-    }
-
-    // Update the user name
-
-  }, {
-    key: 'updateUsername',
-    value: function updateUsername(e) {
-      e.preventDefault();
-
-      // Check if a new username is entered.
-      if ($('#user').val() == '') {
-        handleError('Enter new username');
-        return false;
-      }
-
-      // Send update request
-      sendAjax('PUT', $('#usernameForm').attr('action'), $('#usernameForm').serialize(), redirect);
-
-      return false;
-    }
-  }, {
-    key: 'updatePassword',
-
-
-    // Update the user's password
-    value: function updatePassword(e) {
-      e.preventDefault();
-
-      // Check the password fields
-      if ($('#password').val() === '' || $('#password2').val() === '') {
-        handleError('All fields are required.');
-        return false;
-      }
-
-      // Check if the passwords are equal
-      if ($('#password').val() !== $('#password2').val()) {
-        handleError('Make sure the password fields match.');
-        return false;
-      }
-
-      // Send updated password request
-      sendAjax('PUT', $('#passwordForm').attr('action'), $('#passwordForm').serialize(), redirect);
-
-      return false;
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var account = this.state.data.account;
-
-      // Check if the account data is loaded
-      if (!account) {
-        return React.createElement(
-          'div',
-          { className: 'panel' },
-          'Loading Account Info'
-        );
-      }
-
-      /// Render account options 
-      return React.createElement(
-        'div',
-        { className: 'panel' },
-        React.createElement(
-          'h2',
-          null,
-          'Username: ',
-          account.username
-        ),
-        React.createElement('hr', null),
-        React.createElement(
-          'form',
-          {
-            id: 'usernameForm',
-            onSubmit: this.updateUsername,
-            action: '/updateUsername',
-            method: 'PUT'
-          },
-          React.createElement(
-            'label',
-            { htmlFor: 'name' },
-            'Change Username'
-          ),
-          React.createElement('br', null),
-          React.createElement('input', { id: 'user', type: 'text', name: 'user', placeholder: 'New User Name' }),
-          React.createElement('input', { type: 'hidden', name: '_csrf', value: this.props.csrf }),
-          React.createElement('input', { type: 'submit', value: 'Change Username' })
-        ),
-        React.createElement(
-          'form',
-          {
-            id: 'passwordForm',
-            onSubmit: this.updatePassword,
-            action: '/updatePassword',
-            method: 'PUT'
-          },
-          React.createElement(
-            'label',
-            { htmlFor: 'name' },
-            'Change Password'
-          ),
-          React.createElement('br', null),
-          React.createElement('input', { id: 'password', type: 'text', name: 'password', placeholder: 'New Password' }),
-          React.createElement('br', null),
-          React.createElement('input', { id: 'password2', type: 'text', name: 'password2', placeholder: 'Repeat New Password' }),
-          React.createElement('br', null),
-          React.createElement('input', { type: 'hidden', name: '_csrf', value: this.props.csrf }),
-          React.createElement('input', { type: 'submit', value: 'Change Password' })
-        ),
-        React.createElement('div', { id: 'errorMessage' })
-      );
-    }
-  }]);
-
-  return UserSettingPanel;
-}(React.Component);
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -833,6 +833,7 @@ var sendAjax = function sendAjax(type, action, data, success) {
     success: success,
     error: function error(xhr, status, _error) {
       var messageObj = JSON.parse(xhr.responseText);
+      console.dir(action);
       handleError(messageObj.error);
     }
   });
