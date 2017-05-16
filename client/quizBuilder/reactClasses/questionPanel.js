@@ -12,10 +12,12 @@ class QuestionPanel extends React.Component {
     this.updateDescription = this.updateDescription.bind(this);
   }
 
+  // Load questions in question list
   loadQuestions() {
     this.props.parent.loadQuestions();
   }
 
+  // Set the type of the question
   setQuestionType(e) {
     sendAjax(
       "PUT",
@@ -86,8 +88,10 @@ class QuestionPanel extends React.Component {
         setMessageSaving
       );
 
+    // Pick an answer panel based off the question type
     let answerPanel;
     switch (question.type) {
+      // Multiple Choice question
       case "MultipleChoice":
         answerPanel = (<AnswerMultipleChoiceListPanel
           index={this.props.index}
@@ -96,6 +100,7 @@ class QuestionPanel extends React.Component {
           csrf={this.props.csrf} />);
         break;
 
+      // True/False question
       case "TrueFalse":
         answerPanel = (<AnswerTrueFalsePanel
           index={this.props.index}
@@ -105,7 +110,8 @@ class QuestionPanel extends React.Component {
         />);
         break;
 
-        case "Numeric":
+      // Numeric question
+      case "Numeric":
         answerPanel = (<AnswerNumericPanel
           index={this.props.index}
           question={question}
@@ -114,8 +120,9 @@ class QuestionPanel extends React.Component {
         />);
         break;
 
-        default:
-        case "Text":
+      // Text Question or default case
+      default:
+      case "Text":
         answerPanel = (<AnswerTextPanel
           index={this.props.index}
           question={question}
@@ -127,25 +134,30 @@ class QuestionPanel extends React.Component {
 
     return (
       <div className="questionPanel">
-        <span>Question {this.props.index + 1}:</span>
-        {/* Delete question when clicked */}
-        <input type="button" className="quizBuilderButton deleteQuestion" value="Delete Question"
-          onClick={
-            () => this.props.parent.deleteQuestion(this.props.index)
-          }
-        />
-        <select
-          defaultValue={question.type}
-          onChange={this.setQuestionType}
-        >
-          <option value="MultipleChoice">Multiple Choice</option>
-          <option value="TrueFalse">True or False</option>
-          <option value="Numeric">Numeric</option>
-          <option value="Text">Text Answer</option>
-        </select>
+        <header>
+          <span>Question {this.props.index + 1}: </span>
+          {/* Lets user change the question type */}
+          <select
+            className="questionType"
+            defaultValue={question.type}
+            onChange={this.setQuestionType}
+          >
+            <option value="MultipleChoice">Multiple Choice</option>
+            <option value="TrueFalse">True or False</option>
+            <option value="Numeric">Numeric</option>
+            <option value="Text">Text Answer</option>
+          </select>
+          {/* Delete question when clicked */}
+          <input type="button" className="quizBuilderButton deleteQuestion" value="Delete Question"
+            onClick={
+              () => this.props.parent.deleteQuestion(this.props.index)
+            }
+          />
+        </header>
         <hr />
         <div>
           <label> Title: </label>
+          {/* Let's the user change the title of the question */}
           <AutoExpandTextField
             id={questionTitleId}
             className="questionTitle"
@@ -158,6 +170,7 @@ class QuestionPanel extends React.Component {
         <div>
           <label>Question:</label>
           <br />
+          {/* Let's the user change the content of the question */}
           <AutoExpandTextArea
             id={questionDescriptionId}
             className="questionDescription"
@@ -168,6 +181,7 @@ class QuestionPanel extends React.Component {
           />
           <br />
         </div>
+        {/* Show answers */}
         {answerPanel}
       </div>
     )

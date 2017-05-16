@@ -1,16 +1,17 @@
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
+// Numerical question
 const NumericSchema = new mongoose.Schema(
   {
-    // Minimum accepted number for the answer - Answer if there is not a range
+    // The answer to the question
     answer: {
       type: Number,
       default: 0,
       required: true,
     },
 
-    // Maximum accepted number for the answer.
+    // The distance from the answer that is within correct range.
     error: {
       type: Number,
       default: 0,

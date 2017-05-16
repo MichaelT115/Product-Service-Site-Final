@@ -1,4 +1,4 @@
-
+// Panel that holds an answer to a Text question
 class AnswerTextPanel extends React.Component {
   constructor() {
     super();
@@ -39,7 +39,7 @@ class AnswerTextPanel extends React.Component {
       <div className="answerPanel">
         <AutoExpandTextField
           id={answerContentId}
-          className="questionTitle"
+          className="questionInput"
           placeholder="Type Answer Here"
           defaultValue={question.answer}
           onChange={answerUpdater.update}

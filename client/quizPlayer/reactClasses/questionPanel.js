@@ -15,6 +15,7 @@ class QuestionPanel extends React.Component {
     this.getQuestion();
   }
 
+  // Loads the question from the server
   getQuestion() {
     sendAjax('GET', `/getQuestion?question=${this.props.game.currentIndex}`, { _csrf: this.props.csrf })
       .then((question) => {
@@ -22,7 +23,10 @@ class QuestionPanel extends React.Component {
       });
   }
 
+  // Picks an answer panel to use for the question.
   pickAnswerPanel() {
+
+    // Each question adds 25 points if right and take 5 points if wrong
     let answerPanel;
     switch (this.state.data.question.type) {
       case "MultipleChoice":

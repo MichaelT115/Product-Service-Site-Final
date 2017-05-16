@@ -1,3 +1,4 @@
+// Allows the user to input an answer to a True/False question
 class AnswerTrueFalsePanel extends React.Component {
   // Create initial data
   constructor() {
@@ -15,6 +16,7 @@ class AnswerTrueFalsePanel extends React.Component {
       `/getIsAnswerIsTrue?question=${this.props.index}&answer=${answer}`,
       { _csrf: this.props.csrf, }
     ).then((data) => {
+      // Handles if the answer is correct or not.
       data.isCorrect ? this.props.onCorrectAnswer() : this.props.onWrongAnswer();
     });
   }

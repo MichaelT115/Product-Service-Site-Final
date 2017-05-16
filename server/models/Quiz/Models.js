@@ -13,6 +13,10 @@ let QuestionModels = {};
 // Convert to id object
 const convertId = mongoose.Types.ObjectId;
 
+//
+// Statics
+//
+
 // Converts quiz to API usable object.
 QuizSchema.statics.toAPI = (doc) => ({
   _id: doc._id,
@@ -23,6 +27,7 @@ QuizSchema.statics.toAPI = (doc) => ({
   questions: doc.questions,
 });
 
+// Gets information on the quiz intended for client.
 QuizSchema.statics.getInfo = (doc) => ({
   publicId: doc.publicId,
   title: doc.title,
@@ -95,13 +100,15 @@ QuizSchema.statics.deleteById = (quizId) =>
   QuizModel
     .remove({ _id: quizId })
     .exec();
+
 // Delete quiz by publicId
-QuizSchema.statics.deleteById = (publicId) =>
+QuizSchema.statics.deleteByPublicId = (publicId) =>
   QuizModel
     .remove({ publicId })
     .exec();
 
 
+// Methods that apply to all questions
 QuestionSchemas.Base.QuestionSchema.statics = {
   // Everything except the answer
   getInfo: (doc) => ({
@@ -113,18 +120,21 @@ QuestionSchemas.Base.QuestionSchema.statics = {
     penalty: doc.penalty,
   }),
 
-  // General Question statics
+  // Get all the questions
   findAll: (quizId) =>
     QuizModel
       .findById(quizId)
       .exec()
       .then((doc) => doc.questions),
-  // General Question statics
+
+  // Get question by index and quiz id
   findByIndex: (quizId, questionIndex) =>
     QuizModel
       .findById(quizId)
       .exec()
       .then((doc) => doc.questions[questionIndex]),
+
+  // Add question to quiz
   add: (quizId, question) =>
     QuizModel
       .findById(quizId)
@@ -134,6 +144,8 @@ QuestionSchemas.Base.QuestionSchema.statics = {
         doc.questions.push(question);
         return doc.save();
       }),
+
+  // Update question in quiz
   update: (quizId, questionIndex, _question) =>
     QuizModel
       .findById(quizId)
@@ -143,12 +155,18 @@ QuestionSchemas.Base.QuestionSchema.statics = {
         const question = _question;
         const currentQuestion = doc.questions[questionIndex];
 
+        // Updates new question info to match old
         question.title = currentQuestion.title;
         question.content = currentQuestion.content;
 
+        // Replace old question with new question
         doc.questions.splice(questionIndex, 1, question);
+
+        // Save quiz
         return doc.save();
       }),
+
+  // Update the title of a question
   updateTitle: (quizId, questionIndex, title) =>
     QuizModel
       .findById(quizId)
@@ -159,6 +177,8 @@ QuestionSchemas.Base.QuestionSchema.statics = {
         doc.questions[questionIndex].title = title;
         return doc.save();
       }),
+
+  // Update the content of a question
   updateContent: (quizId, questionIndex, content) =>
     QuizModel
       .findById(quizId)
@@ -169,6 +189,8 @@ QuestionSchemas.Base.QuestionSchema.statics = {
         console.dir(content);
         return doc.save();
       }),
+
+  // Update the reward for answering a question
   updateReward: (quizId, questionIndex, reward) =>
     QuizModel
       .findById(quizId)
@@ -178,6 +200,8 @@ QuestionSchemas.Base.QuestionSchema.statics = {
         doc.questions[questionIndex].reward = reward;
         return doc.save();
       }),
+
+  // Update the penalty for getting a question wrong
   updatePenalty: (quizId, questionIndex, penalty) =>
     QuizModel
       .findById(quizId)
@@ -188,6 +212,7 @@ QuestionSchemas.Base.QuestionSchema.statics = {
         return doc.save();
       }),
 
+  // Delete question from quiz
   delete: (quizId, questionIndex) =>
     QuizModel
       .findById(quizId)
@@ -199,7 +224,9 @@ QuestionSchemas.Base.QuestionSchema.statics = {
       }),
 };
 
+// Methods relating to multiple choice question
 QuestionSchemas.MultipleChoice.MultipleChoiceSchema.statics = {
+  // Update the correct answer index of question
   updateCorrectAnswer: (quizId, questionIndex, answerIndex, isCorrect) =>
     QuizModel
       .findById(quizId)
@@ -208,23 +235,29 @@ QuestionSchemas.MultipleChoice.MultipleChoiceSchema.statics = {
         const doc = _doc;
         const question = doc.questions[questionIndex];
 
+        // If the current correct answer is now false, make the correnct answer index 0
         if (question.correctAnswerIndex === JSON.parse(answerIndex) && !JSON.parse(isCorrect)) {
           question.correctAnswerIndex = 0;
         } else if (isCorrect) {
+          // Set new correct answer
           question.correctAnswerIndex = answerIndex;
         }
 
+        // Save quiz
         return doc.save();
       }),
 };
 
+// Methods relating to the multiple choice answers
 QuestionSchemas.MultipleChoice.Answer.AnswerSchema.statics = {
+  // Find all answers to a question in this quiz
   findAll: (quizId, questionIndex) =>
     QuizModel
       .findById(quizId)
       .exec()
       .then((doc) => doc.questions[questionIndex].answers),
 
+  // Add new multiple choice answer to question in quiz
   add: (quizId, questionIndex, answer) =>
     QuizModel
       .findById(quizId)
@@ -235,6 +268,7 @@ QuestionSchemas.MultipleChoice.Answer.AnswerSchema.statics = {
         return doc.save();
       }),
 
+  // Update multiple choice answer to question in quiz
   update: (quizId, questionIndex, answerIndex, answer) =>
     QuizModel
       .findById(quizId)
@@ -246,6 +280,7 @@ QuestionSchemas.MultipleChoice.Answer.AnswerSchema.statics = {
         return doc.save();
       }),
 
+  // Update the content of the multiple choice answer to question in quiz
   updateContent: (quizId, questionIndex, answerIndex, content) =>
     QuizModel
       .findById(quizId)
@@ -258,6 +293,7 @@ QuestionSchemas.MultipleChoice.Answer.AnswerSchema.statics = {
         return doc.save();
       }),
 
+  // Delete multiple choice answer to question in quiz
   delete: (quizId, questionIndex, answerIndex) =>
     QuizModel
       .findById(quizId)
@@ -266,26 +302,33 @@ QuestionSchemas.MultipleChoice.Answer.AnswerSchema.statics = {
         const doc = _doc;
         const question = doc.questions[questionIndex];
 
+        // Make sure we at least have an empty answer
         if (question.answers.length === 1) {
           question.answers[0] = new QuestionModels.MultipleChoice.AnswerModel();
           question.correctAnswerIndex = 0;
           return doc.save();
         }
 
+        // Delete answer
         question.answers.splice(answerIndex, 1);
         if (question.correctAnswerIndex >= answerIndex) {
+          // New correct answer index
           question.correctAnswerIndex -= 1;
         }
 
+        // Make sure the correct answer index is never under zero
         if (question.correctAnswerIndex < 0) {
           question.correctAnswerIndex = 0;
         }
 
+        // Save quiz
         return doc.save();
       }),
 };
 
+// Methods for True/False questions
 QuestionSchemas.TrueFalse.TrueFalseSchema.statics = {
+  // Update the answer to the question in quiz
   updateAnswerIsTrue: (quizId, questionIndex, isTrue) =>
     QuizModel
       .findById(quizId)
@@ -297,7 +340,9 @@ QuestionSchemas.TrueFalse.TrueFalseSchema.statics = {
       }),
 };
 
+// Methods for Numeric questions
 QuestionSchemas.Numeric.NumericSchema.statics = {
+  // Update the answer to the question in quiz
   updateAnswer: (quizId, questionIndex, answer) =>
     QuizModel
       .findById(quizId)
@@ -307,6 +352,8 @@ QuestionSchemas.Numeric.NumericSchema.statics = {
         doc.questions[questionIndex].answer = answer;
         return doc.save();
       }),
+
+  // Update the error range of question in quiz
   updateError: (quizId, questionIndex, error) =>
     QuizModel
       .findById(quizId)
@@ -318,7 +365,9 @@ QuestionSchemas.Numeric.NumericSchema.statics = {
       }),
 };
 
+// Methods for Text questions
 QuestionSchemas.Text.TextSchema.statics = {
+  // Update the answer to the question in quiz
   updateAnswer: (quizId, questionIndex, answer) =>
     QuizModel
       .findById(quizId)
@@ -331,31 +380,45 @@ QuestionSchemas.Text.TextSchema.statics = {
       }),
 };
 
+//
 // Models
+//
+
+// Make quiz model
 QuizModel = mongoose.model('Quiz', QuizSchema);
 
+// Make question models
 const questionsPath = QuizSchema.path('questions');
 QuestionModels = {
-  Base: mongoose.model(QUESTION_TYPES.BASE, QuestionSchemas.Base.QuestionSchema),
+  // Make base question model
+  Base: mongoose
+    .model(
+    QUESTION_TYPES.BASE,
+    QuestionSchemas.Base.QuestionSchema
+    ),
 
+  // Make multiple choice question model which inherits from base question model
   MultipleChoice: questionsPath
     .discriminator(
     QUESTION_TYPES.MULTIPLE_CHOICE,
     QuestionSchemas.MultipleChoice.MultipleChoiceSchema
     ),
 
+  // Make True/False choice question model which inherits from base question model
   TrueFalse: questionsPath
     .discriminator(
     QUESTION_TYPES.TRUE_FALSE,
     QuestionSchemas.TrueFalse.TrueFalseSchema
     ),
 
+  // Make numeric choice question model which inherits from base question model
   Numeric: questionsPath
     .discriminator(
     QUESTION_TYPES.NUMERIC,
     QuestionSchemas.Numeric.NumericSchema
     ),
 
+  // Make text question model which inherits from base question model
   Text: questionsPath
     .discriminator(
     QUESTION_TYPES.TEXT,
@@ -363,6 +426,7 @@ QuestionModels = {
     ),
 };
 
+// Make Answer model
 QuestionModels.MultipleChoice.AnswerModel =
   mongoose.model('Answer', QuestionSchemas.MultipleChoice.Answer.AnswerSchema);
 

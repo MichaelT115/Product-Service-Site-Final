@@ -23,13 +23,16 @@ const sendAjax = (type, action, data, success) => $.ajax({
   },
 });
 
+// Create the quiz URL
 const createQuizURL = (publicId) =>
   `${window.location.host}/quizPlayer?quiz=${publicId}`;
 
+// Tell user that the quiz is saving.
 const setMessageSaving = () => {
-  $('#quizSaveMessage').text('Saving...');
+  $('#quizSaveMessage').text('Quiz is Saving...');
 };
 
+// Tell the user that the quiz is up-to-date/saved.
 const setMessageSaved = () => {
-  $('#quizSaveMessage').text('Database Up-To-Date');
+  $('#quizSaveMessage').text('Quiz Up-To-Date');
 };

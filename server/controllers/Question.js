@@ -2,12 +2,15 @@ const models = require('../models');
 const QuestionModels = models.Quiz.QuestionModels;
 
 
+// Respond with question
 const returnQuestion = (request, response) => (quiz) =>
   response.json({ question: quiz.questions[request.body.questionIndex] });
 
+// Respond with question
 const returnQuestions = (request, response) => (quiz) =>
   response.json({ questions: quiz.questions });
 
+// Handles when the question search is errors out.
 const onError = (response) => (error) => {
   console.log(error);
   return response.status(400).json({ error: 'An error occurred' });
@@ -25,8 +28,7 @@ const getQuestion = (request, response) =>
     .then((question) => response.json(QuestionModels.Base.getInfo(question)))
     .catch(onError(response));
 
-
-// Check Answers
+// Check if multiple choice answer index is the correct answer
 const getIsCorrectAnswer = (request, response) =>
   QuestionModels.Base.findByIndex(request.session.quiz._id, request.query.question)
     .then((question) =>
@@ -35,6 +37,7 @@ const getIsCorrectAnswer = (request, response) =>
       }))
     .catch(onError(response));
 
+// Check if the true/false answer given is correct
 const getIsAnswerIsTrue = (request, response) =>
   QuestionModels.Base.findByIndex(request.session.quiz._id, request.query.question)
     .then((question) =>
@@ -43,6 +46,7 @@ const getIsAnswerIsTrue = (request, response) =>
       }))
     .catch(onError(response));
 
+// Check if the numerical answer given is correct
 const getIsAnswerNumeric = (request, response) =>
   QuestionModels.Base.findByIndex(request.session.quiz._id, request.query.question)
     .then((question) =>
@@ -51,6 +55,7 @@ const getIsAnswerNumeric = (request, response) =>
       }))
     .catch(onError(response));
 
+// Check if the text answer given is correct
 const getIsAnswerText = (request, response) =>
   QuestionModels.Base.findByIndex(request.session.quiz._id, request.query.question)
     .then((question) =>
@@ -65,6 +70,7 @@ const buildQuestion = (request, response) =>
     .then(returnQuestions(request, response))
     .catch(onError(response));
 
+// Set the question type for this question
 const setQuestionType = (request, response) =>
   QuestionModels.
     Base.
@@ -90,7 +96,7 @@ const updateQuestionContent = (request, response) =>
     .then(returnQuestion(request, response))
     .catch(onError(response));
 
-// Update correct answer choice
+// Update correct answer index for multiple choice question
 const updateCorrectAnswer = (request, response) =>
   QuestionModels
     .MultipleChoice
@@ -103,7 +109,7 @@ const updateCorrectAnswer = (request, response) =>
     .then(returnQuestion(request, response))
     .catch(onError(response));
 
-// Update correct answer choice
+// Update boolean answer for true/false question
 const updateAnswerIsTrue = (request, response) =>
   QuestionModels.TrueFalse
     .updateAnswerIsTrue(
@@ -114,6 +120,7 @@ const updateAnswerIsTrue = (request, response) =>
     .then(returnQuestion(request, response))
     .catch(onError(response));
 
+// Update correct answer for numeric question
 const updateAnswerNumeric = (request, response) =>
   QuestionModels.Numeric
     .updateAnswer(
@@ -124,6 +131,7 @@ const updateAnswerNumeric = (request, response) =>
     .then(returnQuestion(request, response))
     .catch(onError(response));
 
+// Update error range for numeric question
 const updateAnswerError = (request, response) =>
   QuestionModels.Numeric
     .updateError(
@@ -134,6 +142,7 @@ const updateAnswerError = (request, response) =>
     .then(returnQuestion(request, response))
     .catch(onError(response));
 
+// Update text answer for text question
 const updateAnswerText = (request, response) =>
   QuestionModels.Text
     .updateAnswer(

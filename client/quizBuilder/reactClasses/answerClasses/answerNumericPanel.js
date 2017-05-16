@@ -1,4 +1,4 @@
-
+// Panel that holds an answer to a Numeric question
 class AnswerNumericPanel extends React.Component {
   constructor() {
     super();
@@ -20,7 +20,7 @@ class AnswerNumericPanel extends React.Component {
     ).then(this.props.onChange)
   }
 
-  // Update this answer
+  // Update this answer's error interval
   updateAnswerError(error) {
     sendAjax(
       "PUT",
@@ -38,32 +38,34 @@ class AnswerNumericPanel extends React.Component {
     const question = this.props.question;
     return (
       <div>
-        Answer: 
-        <input 
-        type="number"
-         step={0.0001} 
-         defaultValue={question.answer} 
-         name="quantity"
-         onChange ={ (e) => {
-           setMessageSaving();
-            this.updateAnswerNumeric(e.target.value);
-             }}
-         />
-        <br />
-        Allowed Error: 
+        <span>Answer: </span>
         <input
-        type="number"
-        min={0}
-        step={0.0001}
-        defaultValue={question.error}
-        name="quantity"
-        onChange ={ 
-          (e) => {
+          className="questionInput questionInputNumeric"
+          type="number"
+          step={0.1}
+          defaultValue={question.answer}
+          name="quantity"
+          onChange={(e) => {
             setMessageSaving();
-            this.updateAnswerError(e.target.value);
+            this.updateAnswerNumeric(e.target.value);
+          }}
+        />
+        <br />
+        <span>Allowed Error: </span>
+        <input
+          className="questionInput questionInputNumeric"
+          type="number"
+          min={0}
+          step={0.1}
+          defaultValue={question.error}
+          name="quantity"
+          onChange={
+            (e) => {
+              setMessageSaving();
+              this.updateAnswerError(e.target.value);
+            }
           }
-         }
-         />
+        />
       </div>
     )
   }

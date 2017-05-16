@@ -10,7 +10,8 @@ class LoginFromPanelClass extends React.Component {
     }
 
     // Sends login request to server.
-    sendAjax('POST', $('#loginForm').attr('action'), $('#loginForm').serialize(), redirect);
+    sendAjax('POST', $('#loginForm').attr('action'), $('#loginForm').serialize())
+      .then(redirect);
 
     return false;
   }
@@ -29,7 +30,9 @@ class LoginFromPanelClass extends React.Component {
           Build Quizzes<br />
           Try Quizzes
         </h3>
+        {/* Handles error messages */}
         <div id="errorMessage"></div>
+        {/* Login Form */}
         <form id="loginForm"
           name="loginForm"
           onSubmit={this.handleLogin}

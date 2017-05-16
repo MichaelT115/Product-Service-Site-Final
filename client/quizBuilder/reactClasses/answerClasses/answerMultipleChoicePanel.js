@@ -1,4 +1,4 @@
-// Panel that holds an answer to the question
+// Panel that holds a single answer to a multiple choice question
 class AnswerMultipleChoicePanel extends React.Component {
   // Create initial data
   constructor() {

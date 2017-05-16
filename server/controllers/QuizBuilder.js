@@ -3,6 +3,7 @@ const QuizController = require('./Quiz');
 
 const Quiz = models.Quiz;
 
+// Handles when the quiz search is errors out.
 const onError = (response) => (error) => {
   console.log(error);
   return response.status(400).json({ error: 'An error occurred' });
@@ -40,6 +41,7 @@ const buildQuiz = (request, response) => {
     res.json({ redirect: `/quizBuilder?quiz=${newQuiz.publicId}` });
   });
 
+  // Catch error
   quizPromise.catch((err) => {
     console.log(err);
     return res.status(400).json({ error: 'An error occurred' });

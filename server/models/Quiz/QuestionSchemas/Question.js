@@ -5,7 +5,7 @@ const shortid = require('shortid');
 
 const setTitle = (name) => _.escape(name).trim();
 
-// Define question schema
+// Define question schema - other questions inherit from this.
 const QuestionSchema = new mongoose.Schema(
   {
     id: {
@@ -26,10 +26,12 @@ const QuestionSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // The reward for answering correctly
     reward: {
       type: Number,
     },
 
+    // The penalty for answering incorrectly
     penalty: {
       type: Number,
     },

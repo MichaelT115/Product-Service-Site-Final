@@ -23,7 +23,7 @@ const router = (app) => {
     controllers.Account.updatePassword);
 
 
-  // --- Quiz --- //
+  // --- Quiz Routes--- //
   // Selects a quiz then redirects to the quiz player
   app.get('/playQuiz', mid.requiresSecure, controllers.Quiz.playQuiz);
   // Selects a quiz then redirects to the quiz editor
@@ -36,12 +36,14 @@ const router = (app) => {
   app.post('/buildQuiz', mid.requiresSecure, controllers.QuizBuilder.buildQuiz);
   // Get the currently selected quiz
   app.get('/getQuiz', mid.requiresSecure, mid.requiresQuizSelected, controllers.Quiz.getQuiz);
+  // Get info about the quiz meant for the client
   app.get(
     '/getQuizInfo',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Quiz.getQuizInfo
   );
+  // Get info about the quizzes meant for the client
   app.get(
     '/getQuizzesInfo',
     mid.requiresSecure,
@@ -77,33 +79,34 @@ const router = (app) => {
     mid.requiresQuizSelected,
     controllers.Question.getQuestion
   );
-
-  // // Check Answer
+  // Check if multiple choice answer is correct.
   app.get(
     '/getIsCorrectAnswer',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Question.getIsCorrectAnswer
   );
+  // Check if True/False answer is correct
   app.get(
     '/getIsAnswerIsTrue',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Question.getIsAnswerIsTrue
   );
+  // Check if numerical answer is correct
   app.get(
     '/getIsAnswerNumeric',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Question.getIsAnswerNumeric
   );
+  // Check if text answer is correct
   app.get(
     '/getIsAnswerText',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Question.getIsAnswerText
   );
-
   // Create a new question
   app.post(
     '/buildQuestion',
@@ -132,40 +135,41 @@ const router = (app) => {
     mid.requiresQuizSelected,
     controllers.Question.setQuestionType
   );
-  // Update the question's correct answer based of question id and answer id
+  // Update Multiple Choice correct answer based off question id and answer id
   app.put(
     '/updateQuestionCorrectAnswer',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Question.updateCorrectAnswer
   );
-  // Update the question's correct answer based of question id and answer id
+  // Update True/False correct answer based off question id and answer id
   app.put(
     '/updateAnswerIsTrue',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Question.updateAnswerIsTrue
   );
-
+  // Update Numerical correct answer based off question id and answer id
   app.put(
     '/updateAnswerNumeric',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Question.updateAnswerNumeric
   );
+  // Update Numerical error based off question id and answer id
   app.put(
     '/updateAnswerError',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Question.updateAnswerError
   );
+  // Update Text correct answer based off question id and answer id
   app.put(
     '/updateAnswerText',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Question.updateAnswerText
   );
-
   // Delete question and associated answers.
   app.delete(
     '/deleteQuestion',
@@ -175,13 +179,14 @@ const router = (app) => {
   );
 
   // --- Answers --- //
-  // Create new answer based off question id
+  // Get Multiple Choice answer based off question id
   app.get(
     '/getAnswers',
     mid.requiresSecure,
     mid.requiresQuizSelected,
     controllers.Answer.getAnswers
   );
+  // Create new Multiple Choice answer based off question id
   app.post(
     '/buildAnswer',
     mid.requiresSecure,
@@ -203,6 +208,42 @@ const router = (app) => {
     controllers.Answer.deleteAnswer
   );
 
+  // --- Leaderboard --- //
+  // Get leaderboard page
+  app.get(
+    '/getLeaderboardPage',
+    mid.requiresSecure,
+    controllers.Leaderboard.redirectLeaderboard
+  );
+  // Get leaderboard
+  app.get(
+    '/getLeaderboard',
+    mid.requiresSecure,
+    controllers.Leaderboard.getLeaderboard
+  );
+  // Post entry into leaderboard
+  app.post(
+    '/addLeaderboardEntry',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.Leaderboard.addLeaderBoardEntry
+  );
+
+  // --- History --- //
+  // Get history
+  app.get(
+    '/getHistory',
+    mid.requiresSecure,
+    controllers.History.getHistory
+  );
+  // Post entry into history
+  app.post(
+    '/addHistoryEntry',
+    mid.requiresSecure,
+    mid.requiresQuizSelected,
+    controllers.History.addHistoryEntry
+  );
+
   // --- Pages --- //
   // Login page
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
@@ -217,19 +258,33 @@ const router = (app) => {
     mid.requiresLogin,
     controllers.Account.userSettingsPage
   );
-  // Load the quiz builder view
+  // Quiz Builder Page
   app.get(
     '/quizBuilder',
     mid.requiresSecure,
     mid.requiresLogin,
     controllers.QuizBuilder.quizBuilderPage
   );
-  // Load the quiz player view
+  // Quiz Player Page
   app.get(
     '/quizPlayer',
     mid.requiresSecure,
     mid.requiresLogin,
     controllers.QuizPlayer.quizPlayerPage
+  );
+  // Leaderboard Page
+  app.get(
+    '/leaderboard',
+    mid.requiresSecure,
+    mid.requiresLogin,
+    controllers.Leaderboard.leaderboardPage
+  );
+  // History Page
+  app.get(
+    '/history',
+    mid.requiresSecure,
+    mid.requiresLogin,
+    controllers.History.historyPage
   );
   // Redirect non-existent pages to either the app page or the login page.
   app.get('*', mid.requiresSecure, mid.requiresLogin, controllers.Account.mainPage);

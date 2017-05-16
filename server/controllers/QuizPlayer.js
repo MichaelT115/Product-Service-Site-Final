@@ -3,6 +3,7 @@ const QuizController = require('./Quiz');
 
 const Quiz = models.Quiz;
 
+// Handles when the quiz search is errors out.
 const onError = (response) => (error) => {
   console.log(error);
   return response.status(400).json({ error: 'An error occurred' });

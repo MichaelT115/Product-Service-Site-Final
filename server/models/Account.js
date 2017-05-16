@@ -58,23 +58,25 @@ const validatePassword = (doc, password) => new Promise((resolve, reject) => {
 });
 
 // Returns promise to find the account by the username
-AccountSchema.statics.findByUsername = (name) => AccountModel.findOne({ username: name }).exec();
+AccountSchema.statics.findByUsername =
+  (name) => AccountModel.findOne({ username: name }).exec();
 
 // Returns promise to generate hash
-AccountSchema.statics.generateHash = (password) => new Promise((resolve, reject) => {
-  const salt = crypto.randomBytes(saltLength);
+AccountSchema.statics.generateHash =
+  (password) => new Promise((resolve, reject) => {
+    const salt = crypto.randomBytes(saltLength);
 
-  // Encrypt
-  crypto.pbkdf2(password, salt, iterations, keyLength, 'RSA-SHA512', (err, hash) => {
-    if (err) {
-      reject(err);
-    }
-    resolve({
-      salt,
-      hash: hash.toString('hex'),
+    // Encrypt
+    crypto.pbkdf2(password, salt, iterations, keyLength, 'RSA-SHA512', (err, hash) => {
+      if (err) {
+        reject(err);
+      }
+      resolve({
+        salt,
+        hash: hash.toString('hex'),
+      });
     });
   });
-});
 
 // Returns promise to authenticate password.
 AccountSchema.statics.authenticate = (username, password) =>

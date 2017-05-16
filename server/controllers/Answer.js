@@ -2,6 +2,7 @@ const models = require('../models');
 
 const AnswerModel = models.Quiz.QuestionModels.MultipleChoice.AnswerModel;
 
+// Return answer based off selected quiz, question ID, and answer ID.
 const returnAnswer = (request, response) => (quiz) =>
   response.json({
     answer:
@@ -10,14 +11,17 @@ const returnAnswer = (request, response) => (quiz) =>
       .answers[request.body.answerIndex],
   });
 
+// Return answer based off selected quiz, question ID, and answer ID.
 const returnAnswers = (request, response) => (answers) =>
   response.json(answers);
 
+// Handles when the answer search is errors out.
 const onError = (response) => (error) => {
   console.log(error);
   return response.status(400).json({ error: 'An error occurred' });
 };
 
+// Get answers to multiple choice question based off selected quiz and question ID
 const getAnswers = (request, response) =>
   AnswerModel
     .findAll(request.session.quiz._id, request.query.question)

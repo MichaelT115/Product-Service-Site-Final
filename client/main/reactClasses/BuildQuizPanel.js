@@ -19,7 +19,8 @@ class BuildQuizPanel extends React.Component {
   // Render the panel
   render() {
     return (
-      <div className="panel">
+      <div id="buildQuizFormPanel" className="panel">
+        <h1>Build Your Own</h1>
         <form
           id="quizForm"
           name="quizForm"

@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
+// True/False question
 const TrueFalseSchema = new mongoose.Schema(
   {
-    // Index of the correct answer to this question
+    // Whether the answer is true
     isTrue: {
       type: Boolean,
       default: true,

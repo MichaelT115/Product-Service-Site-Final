@@ -17,6 +17,7 @@ class QuizInfoPanel extends React.Component {
     this.loadQuizInfo();
   }
 
+  // Load info about the quiz
   loadQuizInfo() {
     sendAjax('GET', '/getQuizInfo')
       .then((quizInfo) => {
@@ -88,7 +89,7 @@ class QuizInfoPanel extends React.Component {
     return (
       <div id="quizInfoPanel">
         <h1>Quiz Builder</h1>
-        <div>Unique URL:  <input type="text" value={createQuizURL(quizInfo.publicId)} readOnly /></div>
+        <div>Unique URL:  <input id="quizURL" type="text" value={createQuizURL(quizInfo.publicId)} readOnly /></div>
         <hr />
         <div>
           <AutoExpandTextField

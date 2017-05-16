@@ -50,6 +50,100 @@ nav {
     padding: 2px;
 }
 
+p {
+    margin: 0.8em 0;
+}
+
+/* Style related to general panel class */
+.panel {
+    text-align: center;
+    margin: 4px auto;
+    border: 2px solid #0B5C5C;
+    border-spacing: 2px;
+    background-color: #bccd96;
+    border-radius: 4px;
+    padding: 10px;
+    max-width:640px;
+    width: 95%;
+}
+
+.panel .panel {
+    background-color: #eaffba;
+}
+
+.panel label {
+    font-size: 1.4em;
+}
+
+.panel input {
+    font-size: 1.4em;
+}
+
+.panel .button {
+    background-color: #f7ffe6;
+    margin: 2px;
+    padding: 4px;
+    font-size: 0.8em;
+}
+
+/* App Quiz List */
+#quizListPanel {
+    text-align: left;
+    margin: 4px auto;
+    border: 2px solid #0B5C5C;
+    border-spacing: 2px;
+    background-color: #e1f5b3;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+#quizListPanel h1, h2 {
+    margin: 0;
+}
+
+/* App quiz panel */
+.quizPanel {
+    text-align: left;
+}
+
+.quizPanel h1, h2, h3 {
+    display: inline-block;
+    margin: 0;
+}
+.quizPanel h3 {
+    float: right;
+}
+
+.quizPanel .quizDescription {
+    font-size: 1.1em;
+    margin: 4px;
+}
+
+/* App Build Quiz Form Panel */
+#buildQuizFormPanel h1 {
+    margin: 0;
+    font-size: 1.6em;
+}
+
+/* User Settings Panel */
+#userSettingsPanel {
+    text-align: left;
+}
+
+#errorMessage {
+    color: red;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* Quiz Builder / Quiz Player Panel */
+#quizSaveMessage {
+    position: absolute;
+    width: 160px;
+    bottom: 0px;
+    right: 24px;
+}
+
 #quizInfoPanel {
     text-align: left;
     margin: 10px;
@@ -73,6 +167,12 @@ nav {
 #quizInfoPanel h2 {
     font-size: 1.2em;
 }
+
+#quizURL {
+    width: 100%;
+    max-width: 420px;
+}
+
 
 #quizName {
     display: block;
@@ -102,13 +202,6 @@ nav {
     padding: 10px;
 }
 
-.buttonDeleteQuestion {
-    float: right;
-    background-color: rgba(0,0,0, 0.1);
-    color: white;
-    font-size: 0.6em;
-}
-
 .questionTitle {
     background-color: inherit;
     color: white;
@@ -124,6 +217,23 @@ nav {
     resize: none;
 }
 
+.questionType {
+    background-color: rgba(0,0,0, 0.1);
+    font-size: 0.7em;
+}
+
+.questionInput {
+    background-color: inherit;
+    color: white;
+    font-size: 1.0em;
+    max-width: 100%;
+    margin: auto;
+}
+
+.questionInputNumeric {
+    width: 160px;
+}
+
 .quizBuilderButton {
     background-color: rgba(0,0,0, 0.1);
     color: white;
@@ -135,56 +245,14 @@ nav {
     float: right;
 }
 
-.panel {
-    text-align: center;
-    margin: 4px auto;
-    border: 2px solid #0B5C5C;
-    border-spacing: 2px;
-    background-color: #e1f5b3;
-    border-radius: 4px;
-    padding: 10px;
-    max-width:640px;
-    width: 95%;
+.questionPlayerButton {
+    float: right;
+    background-color: rgba(0,0,0, 0.1);
+    color: white;
+    font-size: 0.6em;
 }
 
-.panel label {
-    font-size: 1.4em;
-}
-
-.panel input {
-    font-size: 1.4em;
-}
-
-.panel .button {
-    background-color: rgba(0, 0, 0, 0.2);
-    margin: 8px;
-}
-
-.quizList {
-    text-align: left;
-    margin: 4px auto;
-    border: 2px solid #0B5C5C;
-    border-spacing: 2px;
-    background-color: #e1f5b3;
-    border-radius: 4px;
-    padding: 10px;
-    width:640px;
-}
-
-.quizListPanel {
-    text-align: left;
-}
-
-.quizOptions {
-    margin: 8px;
-}
-
-p {
-    margin: 0;
-}
-
-#errorMessage {
-    color: red;
-    font-size: 1.2em;
-    font-weight: bold;
+.ad {
+    max-width: 100%;
+    width: 320px;
 }

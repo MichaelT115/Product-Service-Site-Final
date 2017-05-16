@@ -3,6 +3,7 @@ mongoose.Promise = global.Promise;
 
 const Answer = require('./Answer.js');
 
+// Multiple Choice Question
 const MultipleChoiceSchema = new mongoose.Schema(
   {
     // Index of the correct answer to this question
@@ -19,7 +20,6 @@ const MultipleChoiceSchema = new mongoose.Schema(
     _id: false,
   }
 );
-
 
 module.exports.MultipleChoiceSchema = MultipleChoiceSchema;
 module.exports.Answer = Answer;

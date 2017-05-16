@@ -1,3 +1,4 @@
+// Displays info about the game
 class GameInfoPanel extends React.Component {
   // Render game info
   render() {

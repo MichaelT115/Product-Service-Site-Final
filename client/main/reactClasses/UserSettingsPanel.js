@@ -75,7 +75,7 @@ class UserSettingPanel extends React.Component {
 
     /// Render account options 
     return (
-      <div className="panel">
+      <div id="userSettingsPanel" className="panel">
         <h2>Username: {account.username}</h2>
         <hr />
         <form
@@ -86,6 +86,7 @@ class UserSettingPanel extends React.Component {
         >
           <label htmlFor="name">Change Username</label><br />
           <input id="user" type="text" name="user" placeholder="New User Name" />
+          <br />
           <input type="hidden" name="_csrf" value={this.props.csrf} />
           <input type="submit" value="Change Username" />
         </form>

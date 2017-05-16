@@ -14,6 +14,7 @@ class GamePanel extends React.Component {
     this.loadQuizInfo = this.loadQuizInfo.bind(this);
     this.nextQuestion = this.nextQuestion.bind(this);
     this.addScore = this.addScore.bind(this);
+    this.onFinished = this.onFinished.bind(this);
   }
 
   // When the component is rendered, load quiz and question IDs.
@@ -51,11 +52,18 @@ class GamePanel extends React.Component {
     // Change the current question index
     game.currentIndex += 1;
     if (game.currentIndex >= questionCount) {
-      game.currentIndex = -1;
+      this.onFinished();
     }
 
     // Update game state
     this.setState(game);
+  }
+
+  // Handles what happen when the user finishes the game
+  onFinished() {
+    this.state.game.currentIndex = -1;
+    sendAjax('POST', '/addLeaderboardEntry', { _csrf: this.props.csrf, score: this.state.game.score });
+    sendAjax('POST', '/addHistoryEntry', { _csrf: this.props.csrf, score: this.state.game.score });
   }
 
   // Render game
@@ -82,9 +90,11 @@ class GamePanel extends React.Component {
     if (!this.state.ad.hasSeenAd && game.currentIndex === this.state.ad.adIndex)
       return (
         <div className="questionPanel">
-          <h1>ADVERTISEMENT - HAVE TO MAKE MONEY SOMEHOW</h1>
+          <h1>ADVERTISEMENT</h1>
+          <img className="ad" src="assets/ads/Domomaker.png" alt="Put your add here" />
+          <br />
           <input type="button" className="quizBuilderButton"
-            value={"Message Internalized"}
+            value={"Next"}
             onClick={() => this.setState({ ad: { hasSeenAd: false } })}
           />
         </div>

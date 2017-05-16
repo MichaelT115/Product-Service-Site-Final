@@ -1,6 +1,5 @@
 // Various tests to run before requests go through //
 
-
 // Checks for an account in the session
 const requiresLogin = (req, res, next) => {
   if (!req.session.account) {

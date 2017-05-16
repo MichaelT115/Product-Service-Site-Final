@@ -17,7 +17,8 @@ class SignUpFromPanelClass extends React.Component {
     }
 
     // Send sign up request to server
-    sendAjax('POST', $('#signupForm').attr('action'), $('#signupForm').serialize(), redirect);
+    sendAjax('POST', $('#signupForm').attr('action'), $('#signupForm').serialize())
+      .then(redirect);
 
     return false;
   };
@@ -36,7 +37,9 @@ class SignUpFromPanelClass extends React.Component {
           Build Quizzes<br />
           Try Quizzes
         </h3>
+        {/* Handles error messages */}
         <div id="errorMessage"></div>
+        {/* Sign up form */}
         <form id="signupForm"
           name="signupForm"
           onSubmit={this.handleSignup}

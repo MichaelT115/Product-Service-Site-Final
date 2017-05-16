@@ -1,4 +1,4 @@
-// Panel that holds an answer to the question
+// Panel that holds an answer to a True/False question
 class AnswerTrueFalsePanel extends React.Component {
   // Create initial data
   constructor() {

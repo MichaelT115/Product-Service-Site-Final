@@ -23,7 +23,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// Panel that holds the list of answers
+// Panel that holds the list of answers to multiple choice question
 var AnswerMultipleChoiceListPanel = function (_React$Component) {
   _inherits(AnswerMultipleChoiceListPanel, _React$Component);
 
@@ -115,7 +115,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// Panel that holds an answer to the question
+// Panel that holds a single answer to a multiple choice question
 var AnswerMultipleChoicePanel = function (_React$Component) {
   _inherits(AnswerMultipleChoicePanel, _React$Component);
 
@@ -218,6 +218,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+// Panel that holds an answer to a Numeric question
 var AnswerNumericPanel = function (_React$Component) {
   _inherits(AnswerNumericPanel, _React$Component);
 
@@ -244,7 +245,7 @@ var AnswerNumericPanel = function (_React$Component) {
       }).then(this.props.onChange);
     }
 
-    // Update this answer
+    // Update this answer's error interval
 
   }, {
     key: "updateAnswerError",
@@ -267,10 +268,15 @@ var AnswerNumericPanel = function (_React$Component) {
       return React.createElement(
         "div",
         null,
-        "Answer:",
+        React.createElement(
+          "span",
+          null,
+          "Answer: "
+        ),
         React.createElement("input", {
+          className: "questionInput questionInputNumeric",
           type: "number",
-          step: 0.0001,
+          step: 0.1,
           defaultValue: question.answer,
           name: "quantity",
           onChange: function onChange(e) {
@@ -279,11 +285,16 @@ var AnswerNumericPanel = function (_React$Component) {
           }
         }),
         React.createElement("br", null),
-        "Allowed Error:",
+        React.createElement(
+          "span",
+          null,
+          "Allowed Error: "
+        ),
         React.createElement("input", {
+          className: "questionInput questionInputNumeric",
           type: "number",
           min: 0,
-          step: 0.0001,
+          step: 0.1,
           defaultValue: question.error,
           name: "quantity",
           onChange: function onChange(e) {
@@ -307,6 +318,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+// Panel that holds an answer to a Text question
 var AnswerTextPanel = function (_React$Component) {
   _inherits(AnswerTextPanel, _React$Component);
 
@@ -353,7 +365,7 @@ var AnswerTextPanel = function (_React$Component) {
         { className: "answerPanel" },
         React.createElement(AutoExpandTextField, {
           id: answerContentId,
-          className: "questionTitle",
+          className: "questionInput",
           placeholder: "Type Answer Here",
           defaultValue: question.answer,
           onChange: answerUpdater.update
@@ -374,7 +386,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// Panel that holds an answer to the question
+// Panel that holds an answer to a True/False question
 var AnswerTrueFalsePanel = function (_React$Component) {
   _inherits(AnswerTrueFalsePanel, _React$Component);
 
@@ -561,11 +573,17 @@ var QuestionPanel = function (_React$Component) {
     return _this;
   }
 
+  // Load questions in question list
+
+
   _createClass(QuestionPanel, [{
     key: "loadQuestions",
     value: function loadQuestions() {
       this.props.parent.loadQuestions();
     }
+
+    // Set the type of the question
+
   }, {
     key: "setQuestionType",
     value: function setQuestionType(e) {
@@ -629,8 +647,10 @@ var QuestionPanel = function (_React$Component) {
         _this2.updateDescription($("#" + questionDescriptionId).val());
       }, setMessageSaving);
 
+      // Pick an answer panel based off the question type
       var answerPanel = void 0;
       switch (question.type) {
+        // Multiple Choice question
         case "MultipleChoice":
           answerPanel = React.createElement(AnswerMultipleChoiceListPanel, {
             index: this.props.index,
@@ -639,6 +659,7 @@ var QuestionPanel = function (_React$Component) {
             csrf: this.props.csrf });
           break;
 
+        // True/False question
         case "TrueFalse":
           answerPanel = React.createElement(AnswerTrueFalsePanel, {
             index: this.props.index,
@@ -648,6 +669,7 @@ var QuestionPanel = function (_React$Component) {
           });
           break;
 
+        // Numeric question
         case "Numeric":
           answerPanel = React.createElement(AnswerNumericPanel, {
             index: this.props.index,
@@ -657,6 +679,7 @@ var QuestionPanel = function (_React$Component) {
           });
           break;
 
+        // Text Question or default case
         default:
         case "Text":
           answerPanel = React.createElement(AnswerTextPanel, {
@@ -672,43 +695,48 @@ var QuestionPanel = function (_React$Component) {
         "div",
         { className: "questionPanel" },
         React.createElement(
-          "span",
+          "header",
           null,
-          "Question ",
-          this.props.index + 1,
-          ":"
-        ),
-        React.createElement("input", { type: "button", className: "quizBuilderButton deleteQuestion", value: "Delete Question",
-          onClick: function onClick() {
-            return _this2.props.parent.deleteQuestion(_this2.props.index);
-          }
-        }),
-        React.createElement(
-          "select",
-          {
-            defaultValue: question.type,
-            onChange: this.setQuestionType
-          },
           React.createElement(
-            "option",
-            { value: "MultipleChoice" },
-            "Multiple Choice"
+            "span",
+            null,
+            "Question ",
+            this.props.index + 1,
+            ": "
           ),
           React.createElement(
-            "option",
-            { value: "TrueFalse" },
-            "True or False"
+            "select",
+            {
+              className: "questionType",
+              defaultValue: question.type,
+              onChange: this.setQuestionType
+            },
+            React.createElement(
+              "option",
+              { value: "MultipleChoice" },
+              "Multiple Choice"
+            ),
+            React.createElement(
+              "option",
+              { value: "TrueFalse" },
+              "True or False"
+            ),
+            React.createElement(
+              "option",
+              { value: "Numeric" },
+              "Numeric"
+            ),
+            React.createElement(
+              "option",
+              { value: "Text" },
+              "Text Answer"
+            )
           ),
-          React.createElement(
-            "option",
-            { value: "Numeric" },
-            "Numeric"
-          ),
-          React.createElement(
-            "option",
-            { value: "Text" },
-            "Text Answer"
-          )
+          React.createElement("input", { type: "button", className: "quizBuilderButton deleteQuestion", value: "Delete Question",
+            onClick: function onClick() {
+              return _this2.props.parent.deleteQuestion(_this2.props.index);
+            }
+          })
         ),
         React.createElement("hr", null),
         React.createElement(
@@ -792,6 +820,9 @@ var QuizInfoPanel = function (_React$Component) {
     value: function componentWillMount() {
       this.loadQuizInfo();
     }
+
+    // Load info about the quiz
+
   }, {
     key: 'loadQuizInfo',
     value: function loadQuizInfo() {
@@ -875,7 +906,7 @@ var QuizInfoPanel = function (_React$Component) {
           'div',
           null,
           'Unique URL:  ',
-          React.createElement('input', { type: 'text', value: createQuizURL(quizInfo.publicId), readOnly: true })
+          React.createElement('input', { id: 'quizURL', type: 'text', value: createQuizURL(quizInfo.publicId), readOnly: true })
         ),
         React.createElement('hr', null),
         React.createElement(
@@ -922,6 +953,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+// A text area that expands its size automatically to fit the content
 var AutoExpandTextArea = function (_React$Component) {
   _inherits(AutoExpandTextArea, _React$Component);
 
@@ -931,7 +963,7 @@ var AutoExpandTextArea = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (AutoExpandTextArea.__proto__ || Object.getPrototypeOf(AutoExpandTextArea)).call(this));
 
     _this.updateSize = _this.updateSize.bind(_this);
-    $(window).resize(_this.updateSize);
+    $(window).resize(_this.updateSize); // Update on window resize
     return _this;
   }
 
@@ -940,19 +972,26 @@ var AutoExpandTextArea = function (_React$Component) {
     value: function componentWillMount() {
       var _this2 = this;
 
+      // The text area must render a frame before updating.
       setTimeout(function () {
         window.requestAnimationFrame(_this2.updateSize);
       }, 0);
     }
+
+    // Change the size
+
   }, {
     key: "updateSize",
     value: function updateSize() {
       var textArea = $("#" + this.props.id)[0];
-      textArea.style.height = '0px';
+      textArea.style.height = '0px'; // Force scroll to get scroll height
       textArea.style.height = textArea.scrollHeight + 5 + "px";
     }
   }, {
     key: "render",
+
+
+    // Render text area
     value: function render() {
       var _this3 = this;
 
@@ -964,7 +1003,9 @@ var AutoExpandTextArea = function (_React$Component) {
         defaultValue: this.props.defaultValue,
         placeholder: this.props.placeholder,
         onChange: function onChange(e) {
+          // Update while new values are entered
           _this3.updateSize();
+          // Call the onChanged method sent in.
           _this3.props.onChange(e);
         }
       });
@@ -983,6 +1024,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+// Text field that automatically expands with content
 var AutoExpandTextField = function (_React$Component) {
   _inherits(AutoExpandTextField, _React$Component);
 
@@ -1002,11 +1044,13 @@ var AutoExpandTextField = function (_React$Component) {
         className: this.props.className,
         type: "text",
         name: this.props.name,
-        size: this.props.defaultValue ? this.props.defaultValue.length : this.props.placeholder ? this.props.placeholder.length : 0,
+        size:
+        // Size it to the default value or the place holder value or to zero
+        this.props.defaultValue ? this.props.defaultValue.length : this.props.placeholder ? this.props.placeholder.length : 0,
         placeholder: this.props.placeholder,
         defaultValue: this.props.defaultValue,
         onChange: function onChange(e) {
-          // Update length of field
+          // Update length of text field
           e.target.size = e.target.value.length || _this2.props.placeholder.length;
           _this2.props.onChange(e);
         }
@@ -1027,9 +1071,9 @@ var DelayUpdateHandler = function () {
   function DelayUpdateHandler(timeDelay, onDelay, onUpdate) {
     _classCallCheck(this, DelayUpdateHandler);
 
-    this.timer = {}; // time out handler
+    this.timer = {}; // timer handler
     this.timeDelay = timeDelay; // The time in milliseconds before the time out
-    this.onUpdate = onUpdate;
+    this.onUpdate = onUpdate; // Function that is run the moment it is updated
     this.onDelay = onDelay; // Function that is run when time out is done.
 
     this.update = this.update.bind(this);
@@ -1045,11 +1089,12 @@ var DelayUpdateHandler = function () {
       if (this.timer) {
         window.clearTimeout(this.timer);
       }
-
+      // If there is an on update function, call it
       if (this.onUpdate) {
         this.onUpdate();
       }
 
+      // Start timer
       this.timer = window.setTimeout(this.onDelay, this.timeDelay);
     }
   }]);
@@ -1079,19 +1124,23 @@ var sendAjax = function sendAjax(type, action, data, success) {
     success: success,
     error: function error(xhr, status, _error) {
       var messageObj = JSON.parse(xhr.responseText);
+      console.dir(action);
       handleError(messageObj.error);
     }
   });
 };
 
+// Create the quiz URL
 var createQuizURL = function createQuizURL(publicId) {
   return window.location.host + '/quizPlayer?quiz=' + publicId;
 };
 
+// Tell user that the quiz is saving.
 var setMessageSaving = function setMessageSaving() {
-  $('#quizSaveMessage').text('Saving...');
+  $('#quizSaveMessage').text('Quiz is Saving...');
 };
 
+// Tell the user that the quiz is up-to-date/saved.
 var setMessageSaved = function setMessageSaved() {
-  $('#quizSaveMessage').text('Database Up-To-Date');
+  $('#quizSaveMessage').text('Quiz Up-To-Date');
 };

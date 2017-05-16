@@ -3,7 +3,8 @@ mongoose.Promise = global.Promise;
 const _ = require('underscore');
 const shortid = require('shortid');
 
-const setContent = (name) => _.escape(name).trim();
+// Trims the content string
+const setContent = (content) => _.escape(content).trim();
 
 // Defines answer schema
 const AnswerSchema = new mongoose.Schema(
@@ -13,7 +14,7 @@ const AnswerSchema = new mongoose.Schema(
       default: shortid.generate,
     },
 
-    // The content of the quiz
+    // The content of the answer
     content: {
       type: String,
       set: setContent,

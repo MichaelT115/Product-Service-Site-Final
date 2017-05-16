@@ -1,4 +1,4 @@
-// Panel that holds the list of answers to the question
+// Panel that holds the list of answers to a multiple choice question
 class AnswerMultipleChoiceListPanel extends React.Component {
   // Create initial data
   constructor() {
@@ -15,7 +15,7 @@ class AnswerMultipleChoiceListPanel extends React.Component {
     this.loadAnswers();
   }
 
-  // Request answer IDs
+  // Request answerss
   loadAnswers() {
     sendAjax('GET', `/getAnswers?question=${this.props.index}`, { _csrf: this.props.csrf, })
       .then((answers) => {
@@ -32,6 +32,7 @@ class AnswerMultipleChoiceListPanel extends React.Component {
       `/getIsCorrectAnswer?question=${this.props.index}&answer=${answer}`,
       { _csrf: this.props.csrf, }
     ).then((data) => {
+      // Handles if the answer is correct or not.
       data.isCorrect ? this.props.onCorrectAnswer() : this.props.onWrongAnswer();
     });
   }

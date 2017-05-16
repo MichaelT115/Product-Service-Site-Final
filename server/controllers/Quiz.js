@@ -2,11 +2,13 @@ const models = require('../models');
 
 const Quiz = models.Quiz;
 
+// Handles when the quiz search is errors out.
 const onError = (response) => (error) => {
   console.log(error);
   return response.status(400).json({ error: 'An error occurred' });
 };
 
+// Add quiz to the session
 const selectQuiz = (_request) => (quiz) => {
   const request = _request;
   request.session.quiz = Quiz.QuizModel.toAPI(quiz);
@@ -62,7 +64,7 @@ const editQuiz = (request, response) =>
 
 // Delete quiz
 const deleteQuiz = (request, response) =>
-  Quiz.QuizModel.deleteById(request.body.publicId)
+  Quiz.QuizModel.deleteByPublicId(request.body.publicId)
     .then(() => response.json({ redirect: '/main' }))
     .catch(onError(response));
 

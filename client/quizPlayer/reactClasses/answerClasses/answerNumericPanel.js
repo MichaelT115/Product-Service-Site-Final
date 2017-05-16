@@ -1,3 +1,4 @@
+// Allows the user to input an answer to a numeric question
 class AnswerNumericPanel extends React.Component {
   // Create initial data
   constructor() {
@@ -15,6 +16,7 @@ class AnswerNumericPanel extends React.Component {
       `/getIsAnswerNumeric?question=${this.props.index}&answer=${answer}`,
       { _csrf: this.props.csrf, }
     ).then((data) => {
+      // Handles if the answer is correct or not.
       data.isCorrect ? this.props.onCorrectAnswer() : this.props.onWrongAnswer();
     });
   }
@@ -27,8 +29,9 @@ class AnswerNumericPanel extends React.Component {
         Answer:
         <input
           id="AnswerNumber"
+          className="questionInput questionInputNumeric"
           type="number"
-          step={0.0001}
+          step={0.1}
         />
         <input
           type="button"

@@ -1,3 +1,4 @@
+// Allows the user to input an answer to a text question
 class AnswerTextPanel extends React.Component {
   // Create initial data
   constructor() {
@@ -15,6 +16,7 @@ class AnswerTextPanel extends React.Component {
       `/getIsAnswerText?question=${this.props.index}&answer=${answer}`,
       { _csrf: this.props.csrf, }
     ).then((data) => {
+      // Handles if the answer is correct or not.
       data.isCorrect ? this.props.onCorrectAnswer() : this.props.onWrongAnswer();
     });
   }
@@ -27,6 +29,7 @@ class AnswerTextPanel extends React.Component {
         Answer:
         <input
           id="AnswerText"
+          className="questionInput"
           type="text"
         />
         <input

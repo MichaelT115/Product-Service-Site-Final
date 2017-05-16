@@ -1,44 +1,17 @@
-"use strict";
+'use strict';
 
-// Render log in window
-var createLoginWindow = function createLoginWindow(csrf) {
-  ReactDOM.render(React.createElement(LoginFromPanelClass, { csrf: csrf }), document.querySelector("#content"));
-};
-
-// Render sign up window
-var createSignupWindow = function createSignupWindow(csrf) {
-  ReactDOM.render(React.createElement(SignUpFromPanelClass, { csrf: csrf }), document.querySelector("#content"));
-};
-
-// Set up login and sing up buttons to create related windows
+// Setup the quiz player page
 var setup = function setup(csrf) {
-  var loginButton = document.querySelector('#loginButton');
-  var signupButton = document.querySelector('#signupButton');
-
-  // Signup button renders sign up window
-  signupButton.addEventListener("click", function (e) {
-    e.preventDefault();
-    createSignupWindow(csrf);
-    return false;
-  });
-
-  // Login button renders login window
-  loginButton.addEventListener("click", function (e) {
-    e.preventDefault();
-    createLoginWindow(csrf);
-    return false;
-  });
-
-  createLoginWindow(csrf); // Default view
+  ReactDOM.render(React.createElement(LeaderboardPanel, { csrf: csrf }), document.querySelector('#leaderboard'));
 };
 
-/// Get csrf and begin setup
 var getToken = function getToken() {
   sendAjax('GET', '/getToken').then(function (result) {
     setup(result.csrfToken);
   });
 };
 
+// Get csrf and begin setup
 $(document).ready(getToken);
 'use strict';
 
@@ -50,212 +23,97 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// Renders the login panel
-var LoginFromPanelClass = function (_React$Component) {
-  _inherits(LoginFromPanelClass, _React$Component);
+// Panel that holds the user's quiz history
+var LeaderboardPanel = function (_React$Component) {
+  _inherits(LeaderboardPanel, _React$Component);
 
-  function LoginFromPanelClass() {
-    _classCallCheck(this, LoginFromPanelClass);
+  function LeaderboardPanel() {
+    _classCallCheck(this, LeaderboardPanel);
 
-    return _possibleConstructorReturn(this, (LoginFromPanelClass.__proto__ || Object.getPrototypeOf(LoginFromPanelClass)).apply(this, arguments));
+    var _this = _possibleConstructorReturn(this, (LeaderboardPanel.__proto__ || Object.getPrototypeOf(LeaderboardPanel)).call(this));
+
+    _this.state = {};
+    _this.state.data = {};
+
+    _this.loadLeaderboard = _this.loadLeaderboard.bind(_this);
+    return _this;
   }
 
-  _createClass(LoginFromPanelClass, [{
-    key: 'handleLogin',
+  // When this is rendered, load the account
 
-    // Handles logging into the app
-    value: function handleLogin(e) {
-      e.preventDefault();
 
-      if ($('#username').val() == '' || $('#password').val() == '') {
-        handleError('You need to fill in both the Username and Password.');
-        return false;
-      }
-
-      // Sends login request to server.
-      sendAjax('POST', $('#loginForm').attr('action'), $('#loginForm').serialize()).then(redirect);
-
-      return false;
+  _createClass(LeaderboardPanel, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.loadLeaderboard();
     }
 
-    // Render login panel
+    // Load account data  
 
+  }, {
+    key: 'loadLeaderboard',
+    value: function loadLeaderboard() {
+      var self = this;
+      sendAjax('GET', '/getLeaderboard', { _csrf: this.props.csrf }).then(function (data) {
+        self.setState({
+          data: {
+            quiz: data.quiz,
+            entries: data.entries
+          }
+        });
+      });
+    }
   }, {
     key: 'render',
     value: function render() {
+      var entries = this.state.data.entries;
+      var quiz = this.state.data.quiz;
+
+      // Check if the account data is loaded
+      if (!entries || !quiz) {
+        return React.createElement(
+          'div',
+          { className: 'panel' },
+          'No Attempts Found.'
+        );
+      }
+
+      var entryNodes = entries.sort(function (a, b) {
+        return a.score < b.score;
+      }).map(function (entry, index) {
+        return React.createElement(
+          'div',
+          { key: index, className: 'panel' },
+          React.createElement(
+            'b',
+            null,
+            index + 1,
+            '.'
+          ),
+          ' ',
+          entry.account,
+          ' - ',
+          entry.score,
+          ' points'
+        );
+      });
+
+      /// Render account options 
       return React.createElement(
         'div',
         { className: 'panel' },
         React.createElement(
-          'h1',
+          'h2',
           null,
-          'Welcome to QuestionR'
+          quiz.title
         ),
-        React.createElement(
-          'div',
-          null,
-          React.createElement('img', { src: '/assets/img/question.jpg', alt: 'QuestionR Logo' })
-        ),
-        React.createElement(
-          'h3',
-          null,
-          'Build Quizzes',
-          React.createElement('br', null),
-          'Try Quizzes'
-        ),
-        React.createElement('div', { id: 'errorMessage' }),
-        React.createElement(
-          'form',
-          { id: 'loginForm',
-            name: 'loginForm',
-            onSubmit: this.handleLogin,
-            action: '/login',
-            method: 'POST',
-            className: 'mainForm'
-          },
-          React.createElement(
-            'div',
-            null,
-            React.createElement(
-              'label',
-              { htmlFor: 'username' },
-              'Username'
-            ),
-            React.createElement('br', null),
-            React.createElement('input', { id: 'username', type: 'text', name: 'username', placeholder: 'Username' })
-          ),
-          React.createElement(
-            'div',
-            null,
-            React.createElement(
-              'label',
-              { htmlFor: 'pass' },
-              'Password'
-            ),
-            React.createElement('br', null),
-            React.createElement('input', { id: 'password', type: 'password', name: 'pass', placeholder: 'Password' })
-          ),
-          React.createElement('input', { type: 'hidden', name: '_csrf', value: this.props.csrf }),
-          React.createElement('input', { className: 'button', type: 'submit', value: 'Log In' })
-        )
+        React.createElement('hr', null),
+        entryNodes
       );
     }
   }]);
 
-  return LoginFromPanelClass;
-}(React.Component);
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-// Renders the signup panel
-var SignUpFromPanelClass = function (_React$Component) {
-  _inherits(SignUpFromPanelClass, _React$Component);
-
-  function SignUpFromPanelClass() {
-    _classCallCheck(this, SignUpFromPanelClass);
-
-    return _possibleConstructorReturn(this, (SignUpFromPanelClass.__proto__ || Object.getPrototypeOf(SignUpFromPanelClass)).apply(this, arguments));
-  }
-
-  _createClass(SignUpFromPanelClass, [{
-    key: 'handleSignup',
-
-    // Handles signing up for the app
-    value: function handleSignup(e) {
-      e.preventDefault();
-
-      // Makes sure the fields are filled
-      if ($('#user').val() == '' || $('#password').val() == '' || $('#password2').val() == '') {
-        handleError('All fields are required.');
-        return false;
-      }
-
-      // Checks if the passwords are the same
-      if ($('#password').val() !== $('#password2').val()) {
-        handleError('Make sure the password fields match.');
-        return false;
-      }
-
-      // Send sign up request to server
-      sendAjax('POST', $('#signupForm').attr('action'), $('#signupForm').serialize()).then(redirect);
-
-      return false;
-    }
-  }, {
-    key: 'render',
-
-
-    // Render login panel  
-    value: function render() {
-      return React.createElement(
-        'div',
-        { className: 'panel' },
-        React.createElement(
-          'h1',
-          null,
-          'Sign Up for QuestionR'
-        ),
-        React.createElement(
-          'div',
-          null,
-          React.createElement('img', { src: '/assets/img/question.jpg', alt: 'QuestionR Logo' })
-        ),
-        React.createElement(
-          'h3',
-          null,
-          'Build Quizzes',
-          React.createElement('br', null),
-          'Try Quizzes'
-        ),
-        React.createElement('div', { id: 'errorMessage' }),
-        React.createElement(
-          'form',
-          { id: 'signupForm',
-            name: 'signupForm',
-            onSubmit: this.handleSignup,
-            action: '/signup',
-            method: 'POST',
-            className: 'mainForm'
-          },
-          React.createElement(
-            'div',
-            null,
-            React.createElement(
-              'label',
-              { htmlFor: 'username' },
-              'Username'
-            ),
-            React.createElement('br', null),
-            React.createElement('input', { id: 'username', type: 'text', name: 'username', placeholder: 'Username' })
-          ),
-          React.createElement(
-            'div',
-            null,
-            React.createElement(
-              'label',
-              { htmlFor: 'pass' },
-              'Password'
-            ),
-            React.createElement('br', null),
-            React.createElement('input', { id: 'password', type: 'password', name: 'pass', placeholder: 'Password' }),
-            React.createElement('br', null),
-            React.createElement('input', { id: 'password2', type: 'password', name: 'pass2', placeholder: 'Repeat Password' })
-          ),
-          React.createElement('input', { type: 'hidden', name: '_csrf', value: this.props.csrf }),
-          React.createElement('input', { className: 'button', type: 'submit', value: 'Sign Up' })
-        )
-      );
-    }
-  }]);
-
-  return SignUpFromPanelClass;
+  return LeaderboardPanel;
 }(React.Component);
 "use strict";
 
